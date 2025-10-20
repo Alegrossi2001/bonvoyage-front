@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
     Box,
-    Grid,
+    Grid2 as Grid,
     Typography,
     Card,
     CardContent,
@@ -63,7 +63,6 @@ import {
     AccessTimeOutlined,
     ContentCopyOutlined,
     DownloadOutlined,
-
     InfoOutlined,
     AttachMoneyOutlined,
     GroupOutlined,
@@ -986,7 +985,7 @@ ${processEmailTemplate(emailTemplate.body)}
 ${processEmailTemplate(emailTemplate.closing)}
 
 ${processEmailTemplate(emailTemplate.signature)}`}
-                                onChange={(e) => {
+                                onChange={() => {
                                     console.log('Email content updated');
                                 }}
                             />
