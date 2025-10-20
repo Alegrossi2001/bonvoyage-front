@@ -9,7 +9,7 @@ import {
 
 } from "@mui/icons-material";
 import type { Role } from '../interfaces/Auth/Auth';
-import Inbox from '../pages/inbox/Inbox';
+import CreateQuotation from '../pages/travels/createTravels/CreateQuotation';
 
 export interface NavigationalRoutes {
     type: "collapse" | "title" | "divider" | "hidden";
@@ -73,7 +73,7 @@ export const NavigationalRoutes: NavigationalRoutes[] = [
                 key: "new-booking",
                 route: "/bookings/new",
                 icon: <BookOnline />,
-                component: <div>New Booking Page</div>,
+                component: <CreateQuotation />
             },
             {
                 type: "collapse",
@@ -91,7 +91,7 @@ export const NavigationalRoutes: NavigationalRoutes[] = [
         key: "inbox",
         icon: <Email />,
         route: "/inbox",
-        component: <Inbox />
+        component: <div>Inbox</div>
     }
 
 ];
