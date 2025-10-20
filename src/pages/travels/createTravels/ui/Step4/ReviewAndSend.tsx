@@ -423,7 +423,7 @@ const ReviewAndSend: React.FC = () => {
                             <CountdownCard>
                                 <CardContent>
                                     <Grid container spacing={3}>
-                                        <Grid item>
+                                        <Grid>
                                             <Stack alignItems="center" spacing={1}>
                                                 <Timer color="warning" sx={{ fontSize: 32 }} />
                                                 <Typography variant="h6" fontWeight={700}>
@@ -435,7 +435,7 @@ const ReviewAndSend: React.FC = () => {
                                             </Stack>
                                         </Grid>
 
-                                        <Grid item xs={12} md={3}>
+                                        <Grid>
                                             <Stack alignItems="center" spacing={1}>
                                                 <AccessTimeOutlined color="info" sx={{ fontSize: 32 }} />
                                                 <Typography variant="h6" fontWeight={700}>
@@ -447,7 +447,7 @@ const ReviewAndSend: React.FC = () => {
                                             </Stack>
                                         </Grid>
 
-                                        <Grid item xs={12} md={3}>
+                                        <Grid>
                                             <Stack alignItems="center" spacing={1}>
                                                 <Alarm color="primary" sx={{ fontSize: 32 }} />
                                                 <Typography variant="h6" fontWeight={700}>
@@ -459,7 +459,7 @@ const ReviewAndSend: React.FC = () => {
                                             </Stack>
                                         </Grid>
 
-                                        <Grid item xs={12} md={3}>
+                                        <Grid>
                                             <Stack alignItems="center" spacing={1}>
                                                 <Schedule color="success" sx={{ fontSize: 32 }} />
                                                 <Typography variant="h6" fontWeight={700}>
@@ -491,7 +491,7 @@ const ReviewAndSend: React.FC = () => {
                                 'overview',
                                 'Quote Overview',
                                 <Grid container spacing={3}>
-                                    <Grid item xs={12} md={6}>
+                                    <Grid>
                                         <Stack spacing={2}>
                                             <Box>
                                                 <Typography variant="subtitle2" color="text.secondary">
@@ -533,7 +533,7 @@ const ReviewAndSend: React.FC = () => {
                                         </Stack>
                                     </Grid>
 
-                                    <Grid item xs={12} md={6}>
+                                    <Grid>
                                         <Box>
                                             <Typography variant="subtitle2" color="text.secondary">
                                                 Pricing Summary

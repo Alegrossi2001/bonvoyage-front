@@ -381,13 +381,13 @@ const SummaryPriceBreakdown: React.FC = () => {
 
             <Grid container spacing={4}>
                 {/* Quote Overview */}
-                <Grid item xs={12} lg={8}>
+                <Grid>
                     <Stack spacing={4}>
                         {/* Quote Header */}
                         <Card>
                             <CardContent>
                                 <Grid container spacing={3}>
-                                    <Grid xs={12} md={6}>
+                                    <Grid>
                                         <Typography variant="h6" fontWeight={600} gutterBottom>
                                             Quote Details
                                         </Typography>
@@ -407,7 +407,7 @@ const SummaryPriceBreakdown: React.FC = () => {
                                         </Stack>
                                     </Grid>
 
-                                    <Grid xs={12} md={6}>
+                                    <Grid>
                                         <Typography variant="h6" fontWeight={600} gutterBottom>
                                             Trip Information
                                         </Typography>
@@ -537,7 +537,7 @@ const SummaryPriceBreakdown: React.FC = () => {
                                 </Alert>
 
                                 <Grid container spacing={3}>
-                                    <Grid xs={12} md={4}>
+                                    <Grid>
                                         <TextField
                                             fullWidth
                                             type="number"
@@ -554,7 +554,7 @@ const SummaryPriceBreakdown: React.FC = () => {
                                         />
                                     </Grid>
 
-                                    <Grid xs={12} md={4}>
+                                    <Grid>
                                         <TextField
                                             fullWidth
                                             type="number"
@@ -571,7 +571,7 @@ const SummaryPriceBreakdown: React.FC = () => {
                                         />
                                     </Grid>
 
-                                    <Grid xs={12} md={4}>
+                                    <Grid>
                                         <Paper sx={{ p: 2, textAlign: 'center', backgroundColor: alpha(theme.palette.primary.main, 0.05) }}>
                                             <Typography variant="caption" color="text.secondary">
                                                 New Price per Person
@@ -598,7 +598,7 @@ const SummaryPriceBreakdown: React.FC = () => {
                 </Grid>
 
                 {/* Pricing Summary */}
-                <Grid xs={12} lg={4}>
+                <Grid>
                     <Stack spacing={3}>
                         {/* Main Pricing Card */}
                         <PriceCard>
@@ -792,7 +792,7 @@ const SummaryPriceBreakdown: React.FC = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={3}>
-                        <Grid xs={12} md={6}>
+                        <Grid>
                             <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                                 Adjust Parameters
                             </Typography>
@@ -830,7 +830,7 @@ const SummaryPriceBreakdown: React.FC = () => {
                             </Stack>
                         </Grid>
 
-                        <Grid xs={12} md={6}>
+                        <Grid>
                             <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                                 Price Impact
                             </Typography>
