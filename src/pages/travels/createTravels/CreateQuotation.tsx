@@ -37,53 +37,7 @@ const CreateQuotation = () => {
 
             case 4:
                 return <ReviewAndSend />
-            /*case 0:
-                return (
-                    <CustomerRequirements
-                        customer={quotationState.customer}
-                        requirements={quotationState.requirements}
-                        onChange={(updates) => updateQuotationState(updates)}
-                        initialEmail={initialEmail}
-                    />
-                );
 
-            case 1:
-                return (
-                    <ItineraryBuilder
-                        requirements={quotationState.requirements}
-                        itinerary={quotationState.itinerary}
-                        onChange={(itinerary) => updateQuotationState({ itinerary })}
-                    />
-                );
-
-            case 2:
-                return (
-                    <ServiceSelection
-                        requirements={quotationState.requirements}
-                        itinerary={quotationState.itinerary}
-                        services={quotationState.services}
-                        onChange={(services) => updateQuotationState({ services })}
-                    />
-                );
-
-            case 3:
-                return (
-                    <PricingOptimizer
-                        services={quotationState.services}
-                        pricing={quotationState.pricing}
-                        requirements={quotationState.requirements}
-                        onChange={(pricing) => updateQuotationState({ pricing })}
-                    />
-                );
-            
-            case 4:
-                return (
-                    <QuotePreview
-                        quotation={quotationState}
-                        onChange={updateQuotationState}
-                    />
-                );
-            */
             default:
                 return null;
         }

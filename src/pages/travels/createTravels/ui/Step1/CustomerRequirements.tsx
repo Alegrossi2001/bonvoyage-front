@@ -10,7 +10,6 @@ import {
     CardContent,
     Stack,
     Chip,
-    Button,
     IconButton,
     Alert,
     InputAdornment,
@@ -137,7 +136,7 @@ const CustomerRequirements: React.FC = () => {
         handleSubmit,
         watch,
         setValue,
-        formState: { errors, isValid }
+        formState: { errors }
     } = useForm<CustomerRequirementsForm>({
         defaultValues: {
             clientName: '',
@@ -691,23 +690,6 @@ const CustomerRequirements: React.FC = () => {
                                 />
                             </CardContent>
                         </FormCard>
-
-                        {/* Submit Button */}
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="body2" color="text.secondary">
-                                {isValid ? '✅ All required fields completed' : '⚠️ Please complete all required fields'}
-                            </Typography>
-
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                size="large"
-                                disabled={!isValid}
-                                sx={{ minWidth: 200 }}
-                            >
-                                Continue to Itinerary →
-                            </Button>
-                        </Box>
                     </Stack>
                 </form>
             </Box>
