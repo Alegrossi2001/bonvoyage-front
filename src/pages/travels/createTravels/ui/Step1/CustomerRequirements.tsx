@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useCallback, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
     Box,
-    Grid,
     Typography,
     TextField,
     Autocomplete,
@@ -16,6 +16,7 @@ import {
     InputAdornment,
     alpha,
     useTheme,
+    Grid,
 } from '@mui/material';
 import {
     PersonOutlined,
@@ -31,8 +32,8 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { styled } from '@mui/material/styles';
 import dayjs, { Dayjs } from 'dayjs';
+import { FormCard } from '../Primitives';
 
 // Form data interface
 interface CustomerRequirementsForm {
@@ -123,16 +124,6 @@ const popularDestinations = [
     'Fatima, Portugal',
     'Santiago de Compostela, Spain',
 ];
-
-const FormCard = styled(Card)(({ theme }) => ({
-    border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-    borderRadius: theme.spacing(2),
-    boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.04)}`,
-
-    '&:hover': {
-        boxShadow: `0 4px 16px ${alpha(theme.palette.primary.main, 0.08)}`,
-    },
-}));
 
 const CustomerRequirements: React.FC = () => {
     const theme = useTheme();
@@ -283,7 +274,7 @@ const CustomerRequirements: React.FC = () => {
                                 </Stack>
 
                                 <Grid container spacing={3}>
-                                    <Grid xs={12} md={8}>
+                                    <Grid size={8}>
                                         <Controller
                                             name="clientName"
                                             control={control}
@@ -330,7 +321,7 @@ const CustomerRequirements: React.FC = () => {
                                         />
                                     </Grid>
 
-                                    <Grid xs={12} md={4}>
+                                    <Grid size={{ xs: 12, md: 4 }}>
                                         <Controller
                                             name="contactPerson"
                                             control={control}
@@ -354,7 +345,7 @@ const CustomerRequirements: React.FC = () => {
 
                                     {/* Client Details Display */}
                                     {selectedClient && (
-                                        <Grid xs={12}>
+                                        <Grid size={{ xs: 12 }}>
                                             <Alert
                                                 severity="info"
                                                 icon={<InfoOutlined />}
@@ -394,7 +385,7 @@ const CustomerRequirements: React.FC = () => {
                                 </Stack>
 
                                 <Grid container spacing={3}>
-                                    <Grid xs={12}>
+                                    <Grid size={{ xs: 12 }}>
                                         <Controller
                                             name="tripTitle"
                                             control={control}
@@ -412,7 +403,7 @@ const CustomerRequirements: React.FC = () => {
                                         />
                                     </Grid>
 
-                                    <Grid xs={12}>
+                                    <Grid size={{ xs: 12 }}>
                                         <Controller
                                             name="destinations"
                                             control={control}
@@ -462,7 +453,7 @@ const CustomerRequirements: React.FC = () => {
                                         />
                                     </Grid>
 
-                                    <Grid xs={12} md={6}>
+                                    <Grid size={{ xs: 12, md: 6 }}>
                                         <Controller
                                             name="dateFrom"
                                             control={control}
@@ -491,7 +482,7 @@ const CustomerRequirements: React.FC = () => {
                                         />
                                     </Grid>
 
-                                    <Grid xs={12} md={6}>
+                                    <Grid size={{ xs: 12, md: 6 }}>
                                         <Controller
                                             name="dateTo"
                                             control={control}
@@ -542,7 +533,7 @@ const CustomerRequirements: React.FC = () => {
                                 </Stack>
 
                                 <Grid container spacing={3}>
-                                    <Grid xs={12} md={4}>
+                                    <Grid size={{ xs: 12, md: 4 }}>
                                         <Controller
                                             name="numberOfTravellers"
                                             control={control}
@@ -572,7 +563,7 @@ const CustomerRequirements: React.FC = () => {
                                         />
                                     </Grid>
 
-                                    <Grid xs={12} md={4}>
+                                    <Grid size={{ xs: 12, md: 4 }}>
                                         <Controller
                                             name="numberOfGroups"
                                             control={control}
@@ -593,7 +584,7 @@ const CustomerRequirements: React.FC = () => {
                                         />
                                     </Grid>
 
-                                    <Grid xs={12} md={4}>
+                                    <Grid size={{ xs: 12, md: 4 }}>
                                         <Controller
                                             name="groupSize"
                                             control={control}
@@ -634,7 +625,7 @@ const CustomerRequirements: React.FC = () => {
                                     render={({ field }) => (
                                         <Grid container spacing={2}>
                                             {tripTypes.map((type) => (
-                                                <Grid xs={12} sm={6} md={4} key={type.value}>
+                                                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={type.value}>
                                                     <Card
                                                         sx={{
                                                             cursor: 'pointer',
@@ -725,3 +716,4 @@ const CustomerRequirements: React.FC = () => {
 };
 
 export default CustomerRequirements;
+

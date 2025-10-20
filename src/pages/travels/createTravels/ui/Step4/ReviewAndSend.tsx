@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
     Box,
-    Grid2 as Grid,
     Typography,
     Card,
     CardContent,
@@ -23,22 +22,9 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    Badge,
-    Tooltip,
     alpha,
     useTheme,
-    Avatar,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Stepper,
-    Step,
-    StepLabel,
-    StepContent,
+    Grid,
 } from '@mui/material';
 import {
     Timeline,
@@ -308,15 +294,6 @@ const ReviewAndSend: React.FC = () => {
         // Update status and timestamp
         setQuoteStatus('sent');
 
-        // Add to activity log
-        const newActivity = {
-            id: Date.now().toString(),
-            type: 'sent',
-            user: 'John Smith',
-            timestamp: new Date().toISOString(),
-            details: `Quote sent to ${mockQuoteData.client.email}`,
-        };
-
         console.log('Quote sent successfully!');
         setEmailDialogOpen(false);
     }, []);
@@ -428,7 +405,7 @@ const ReviewAndSend: React.FC = () => {
                             />
                             <Chip
                                 label={quoteStatus}
-                                color={getStatusColor(quoteStatus) as any}
+                                color={getStatusColor(quoteStatus) as "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning"}
                                 variant="filled"
                             />
                             <Typography variant="caption" color="text.secondary">
@@ -440,13 +417,13 @@ const ReviewAndSend: React.FC = () => {
 
                 <Grid container spacing={4}>
                     {/* Main Content */}
-                    <Grid xs={12} lg={8}>
+                    <Grid size={12}>
                         <Stack spacing={3}>
                             {/* Quote Timer/Status */}
                             <CountdownCard>
                                 <CardContent>
                                     <Grid container spacing={3}>
-                                        <Grid xs={12} md={3}>
+                                        <Grid item>
                                             <Stack alignItems="center" spacing={1}>
                                                 <Timer color="warning" sx={{ fontSize: 32 }} />
                                                 <Typography variant="h6" fontWeight={700}>
@@ -458,7 +435,7 @@ const ReviewAndSend: React.FC = () => {
                                             </Stack>
                                         </Grid>
 
-                                        <Grid xs={12} md={3}>
+                                        <Grid item xs={12} md={3}>
                                             <Stack alignItems="center" spacing={1}>
                                                 <AccessTimeOutlined color="info" sx={{ fontSize: 32 }} />
                                                 <Typography variant="h6" fontWeight={700}>
@@ -470,7 +447,7 @@ const ReviewAndSend: React.FC = () => {
                                             </Stack>
                                         </Grid>
 
-                                        <Grid xs={12} md={3}>
+                                        <Grid item xs={12} md={3}>
                                             <Stack alignItems="center" spacing={1}>
                                                 <Alarm color="primary" sx={{ fontSize: 32 }} />
                                                 <Typography variant="h6" fontWeight={700}>
@@ -482,7 +459,7 @@ const ReviewAndSend: React.FC = () => {
                                             </Stack>
                                         </Grid>
 
-                                        <Grid xs={12} md={3}>
+                                        <Grid item xs={12} md={3}>
                                             <Stack alignItems="center" spacing={1}>
                                                 <Schedule color="success" sx={{ fontSize: 32 }} />
                                                 <Typography variant="h6" fontWeight={700}>
@@ -514,7 +491,7 @@ const ReviewAndSend: React.FC = () => {
                                 'overview',
                                 'Quote Overview',
                                 <Grid container spacing={3}>
-                                    <Grid xs={12} md={6}>
+                                    <Grid item xs={12} md={6}>
                                         <Stack spacing={2}>
                                             <Box>
                                                 <Typography variant="subtitle2" color="text.secondary">
@@ -556,7 +533,7 @@ const ReviewAndSend: React.FC = () => {
                                         </Stack>
                                     </Grid>
 
-                                    <Grid xs={12} md={6}>
+                                    <Grid item xs={12} md={6}>
                                         <Box>
                                             <Typography variant="subtitle2" color="text.secondary">
                                                 Pricing Summary
@@ -601,7 +578,7 @@ const ReviewAndSend: React.FC = () => {
                                 'services',
                                 'Services Included',
                                 <Stack spacing={2}>
-                                    {mockQuoteData.services.map((service, index) => (
+                                    {mockQuoteData.services.map((service) => (
                                         <Stack key={service.id} direction="row" justifyContent="space-between" alignItems="center">
                                             <Box>
                                                 <Typography variant="body2" fontWeight={600}>
@@ -657,7 +634,7 @@ const ReviewAndSend: React.FC = () => {
                                     </Stack>
 
                                     <Grid container spacing={2}>
-                                        <Grid xs={12} md={6}>
+                                        <Grid>
                                             <TextField
                                                 fullWidth
                                                 label="Version Number"
@@ -667,7 +644,7 @@ const ReviewAndSend: React.FC = () => {
                                                 size="small"
                                             />
                                         </Grid>
-                                        <Grid xs={12} md={6}>
+                                        <Grid>
                                             <FormControl fullWidth size="small">
                                                 <InputLabel>Status</InputLabel>
                                                 <Select
@@ -695,7 +672,7 @@ const ReviewAndSend: React.FC = () => {
                     </Grid>
 
                     {/* Sidebar */}
-                    <Grid xs={12} lg={4}>
+                    <Grid>
                         <Stack spacing={3}>
                             {/* Actions */}
                             <Card>
@@ -844,7 +821,7 @@ const ReviewAndSend: React.FC = () => {
                                                         </Typography>
                                                     </TimelineOppositeContent>
                                                     <TimelineSeparator>
-                                                        <TimelineDot color={getActivityColor(activity.type) as any}>
+                                                        <TimelineDot color={getActivityColor(activity.type) as "inherit" | "grey" | "primary" | "secondary" | "error" | "info" | "success" | "warning"}>
                                                             {getActivityIcon(activity.type)}
                                                         </TimelineDot>
                                                         <TimelineConnector />
@@ -943,7 +920,7 @@ const ReviewAndSend: React.FC = () => {
                     <DialogContent>
                         <Stack spacing={3} sx={{ mt: 1 }}>
                             <Grid container spacing={2}>
-                                <Grid xs={12} md={6}>
+                                <Grid>
                                     <TextField
                                         fullWidth
                                         label="To"
@@ -952,7 +929,7 @@ const ReviewAndSend: React.FC = () => {
                                         size="small"
                                     />
                                 </Grid>
-                                <Grid xs={12} md={6}>
+                                <Grid>
                                     <TextField
                                         fullWidth
                                         label="CC (Optional)"

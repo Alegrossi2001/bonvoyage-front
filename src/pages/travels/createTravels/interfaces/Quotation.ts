@@ -1,4 +1,4 @@
-export type QuotationStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'expired';
+import type { QuotationStatus } from "../../../../interfaces/Values/Plans";
 
 export interface Quotation {
     id: string;

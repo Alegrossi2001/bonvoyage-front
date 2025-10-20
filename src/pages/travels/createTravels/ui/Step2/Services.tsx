@@ -2,10 +2,8 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import {
     Box,
-    Grid,
     Typography,
     TextField,
-    Autocomplete,
     FormControl,
     InputLabel,
     Select,
@@ -19,42 +17,30 @@ import {
     Alert,
     Divider,
     InputAdornment,
-    Tooltip,
     alpha,
     useTheme,
     Paper,
-    Badge,
-    Fab,
     Dialog,
     DialogTitle,
     DialogContent,
     DialogActions,
-    List,
-    ListItem,
-    ListItemText,
-    ListItemSecondaryAction,
-    Switch,
     Collapse,
+    Grid,
 } from '@mui/material';
 import {
     AddOutlined,
     DeleteOutlined,
     HotelOutlined,
-    FlightOutlined,
     DirectionsBusOutlined,
     RestaurantOutlined,
     TourOutlined,
     PersonOutlined,
     MoreHorizOutlined,
-    ContentCopyOutlined,
     ExpandMoreOutlined,
     ExpandLessOutlined,
     TrendingUpOutlined,
     CalculateOutlined,
     StarOutlined,
-    AttachMoneyOutlined,
-    WarningOutlined,
-    CheckCircleOutlined,
     AutoAwesomeOutlined,
     SpeedOutlined,
 } from '@mui/icons-material';
@@ -92,25 +78,41 @@ const supplierDatabase = {
             id: 'acc_001',
             name: 'Hotel Roma Palace',
             category: 'accommodation',
-            location: 'Rome, Italy',
-            type: '4-star Hotel',
-            netPrice: 85,
-            unit: 'per room/night',
             rating: 4.2,
-            commission: 12,
-            notes: 'Central location, breakfast included'
+            verified: true,
+            services: [{
+                id: '1',
+                category: 'accommodation' as const,
+                description: '4-star Hotel - Central location, breakfast included',
+                quantity: 1,
+                unit: 'room-nights',
+                unitCost: 85,
+                totalCost: 85,
+                markup: 12,
+                markupAmount: 10.2,
+                finalPrice: 95.2,
+                notes: 'Central location, breakfast included'
+            }]
         },
         {
             id: 'acc_002',
             name: 'Hostel San Lorenzo',
             category: 'accommodation',
-            location: 'Rome, Italy',
-            type: 'Hostel',
-            netPrice: 25,
-            unit: 'per bed/night',
             rating: 3.8,
-            commission: 8,
-            notes: 'Budget option, shared facilities'
+            verified: true,
+            services: [{
+                id: '1',
+                category: 'accommodation' as const,
+                description: 'Hostel - Budget option, shared facilities',
+                quantity: 1,
+                unit: 'bed-nights',
+                unitCost: 25,
+                totalCost: 25,
+                markup: 8,
+                markupAmount: 2,
+                finalPrice: 27,
+                notes: 'Budget option, shared facilities'
+            }]
         },
     ],
     transport: [
@@ -118,23 +120,41 @@ const supplierDatabase = {
             id: 'trans_001',
             name: 'Roma Coach Services',
             category: 'transport',
-            type: '49-seater Coach',
-            netPrice: 450,
-            unit: 'per day',
             rating: 4.5,
-            commission: 15,
-            notes: 'Air conditioning, WiFi, professional driver'
+            verified: true,
+            services: [{
+                id: '1',
+                category: 'transport' as const,
+                description: '49-seater Coach with AC and WiFi',
+                quantity: 1,
+                unit: 'days',
+                unitCost: 450,
+                totalCost: 450,
+                markup: 15,
+                markupAmount: 67.5,
+                finalPrice: 517.5,
+                notes: 'Air conditioning, WiFi, professional driver'
+            }]
         },
         {
             id: 'trans_002',
             name: 'Airport Transfer Pro',
             category: 'transport',
-            type: 'Airport Transfer',
-            netPrice: 65,
-            unit: 'per transfer',
             rating: 4.3,
-            commission: 10,
-            notes: 'Meet & greet service included'
+            verified: true,
+            services: [{
+                id: '1',
+                category: 'transport' as const,
+                description: 'Airport Transfer with meet & greet',
+                quantity: 1,
+                unit: 'transfers',
+                unitCost: 65,
+                totalCost: 65,
+                markup: 10,
+                markupAmount: 6.5,
+                finalPrice: 71.5,
+                notes: 'Meet & greet service included'
+            }]
         },
     ],
     guide: [
@@ -142,12 +162,21 @@ const supplierDatabase = {
             id: 'guide_001',
             name: 'Marco Rossi - Licensed Guide',
             category: 'guide',
-            type: 'Vatican & Colosseum Specialist',
-            netPrice: 180,
-            unit: 'per half-day',
             rating: 4.8,
-            commission: 0,
-            notes: 'Fluent English, educational groups specialist'
+            verified: true,
+            services: [{
+                id: '1',
+                category: 'guide' as const,
+                description: 'Vatican & Colosseum Specialist Guide',
+                quantity: 1,
+                unit: 'half-days',
+                unitCost: 180,
+                totalCost: 180,
+                markup: 20,
+                markupAmount: 36,
+                finalPrice: 216,
+                notes: 'Fluent English, educational groups specialist'
+            }]
         },
     ],
     meal: [
@@ -155,12 +184,21 @@ const supplierDatabase = {
             id: 'meal_001',
             name: 'Pizzeria Tradizionale',
             category: 'meal',
-            type: 'Traditional Italian Lunch',
-            netPrice: 18,
-            unit: 'per person',
             rating: 4.1,
-            commission: 5,
-            notes: 'Pizza + drink + gelato, group menus available'
+            verified: true,
+            services: [{
+                id: '1',
+                category: 'meal' as const,
+                description: 'Traditional Italian Lunch',
+                quantity: 1,
+                unit: 'persons',
+                unitCost: 18,
+                totalCost: 18,
+                markup: 5,
+                markupAmount: 0.9,
+                finalPrice: 18.9,
+                notes: 'Pizza + drink + gelato, group menus available'
+            }]
         },
     ],
     activity: [
@@ -168,12 +206,21 @@ const supplierDatabase = {
             id: 'act_001',
             name: 'Vatican Museums Skip-the-Line',
             category: 'activity',
-            type: 'Museum Entry',
-            netPrice: 22,
-            unit: 'per person',
             rating: 4.6,
-            commission: 0,
-            notes: 'Audio guide included, group rates available'
+            verified: true,
+            services: [{
+                id: '1',
+                category: 'activity' as const,
+                description: 'Vatican Museums Entry with Skip-the-Line',
+                quantity: 1,
+                unit: 'persons',
+                unitCost: 22,
+                totalCost: 22,
+                markup: 10,
+                markupAmount: 2.2,
+                finalPrice: 24.2,
+                notes: 'Audio guide included, group rates available'
+            }]
         },
     ],
 };
@@ -187,44 +234,64 @@ const serviceTemplates = [
         icon: '🎓',
         services: [
             {
-                category: 'accommodation',
+                id: '1',
+                category: 'accommodation' as const,
                 description: 'Hotel accommodation - twin rooms',
                 quantity: 6,
                 unit: 'room-nights',
                 unitCost: 85,
+                totalCost: 510,
                 markup: 20,
+                markupAmount: 102,
+                finalPrice: 612,
             },
             {
-                category: 'transport',
+                id: '2',
+                category: 'transport' as const,
                 description: 'Airport transfers + city transport',
                 quantity: 3,
                 unit: 'days',
                 unitCost: 450,
+                totalCost: 1350,
                 markup: 15,
+                markupAmount: 202.5,
+                finalPrice: 1552.5,
             },
             {
-                category: 'guide',
+                id: '3',
+                category: 'guide' as const,
                 description: 'Licensed guide for historical sites',
                 quantity: 2,
                 unit: 'half-days',
                 unitCost: 180,
+                totalCost: 360,
                 markup: 25,
+                markupAmount: 90,
+                finalPrice: 450,
             },
             {
-                category: 'meal',
+                id: '4',
+                category: 'meal' as const,
                 description: 'Traditional Italian lunches',
                 quantity: 30,
                 unit: 'persons',
                 unitCost: 18,
+                totalCost: 540,
                 markup: 15,
+                markupAmount: 81,
+                finalPrice: 621,
             },
             {
-                category: 'activity',
+                id: '5',
+                category: 'activity' as const,
                 description: 'Vatican Museums + Colosseum entry',
                 quantity: 30,
                 unit: 'persons',
                 unitCost: 22,
+                totalCost: 660,
                 markup: 10,
+                markupAmount: 66,
+                finalPrice: 726,
             },
         ]
     },
@@ -235,28 +302,40 @@ const serviceTemplates = [
         icon: '⛪',
         services: [
             {
-                category: 'accommodation',
+                id: '1',
+                category: 'accommodation' as const,
                 description: 'Simple hotel/guesthouse accommodation',
                 quantity: 4,
                 unit: 'room-nights',
                 unitCost: 65,
+                totalCost: 260,
                 markup: 18,
+                markupAmount: 46.8,
+                finalPrice: 306.8,
             },
             {
-                category: 'transport',
+                id: '2',
+                category: 'transport' as const,
                 description: 'Coach transport to religious sites',
                 quantity: 2,
                 unit: 'days',
                 unitCost: 380,
+                totalCost: 760,
                 markup: 12,
+                markupAmount: 91.2,
+                finalPrice: 851.2,
             },
             {
-                category: 'guide',
+                id: '3',
+                category: 'guide' as const,
                 description: 'Religious sites specialist guide',
                 quantity: 3,
                 unit: 'half-days',
                 unitCost: 160,
+                totalCost: 480,
                 markup: 20,
+                markupAmount: 96,
+                finalPrice: 576,
             },
         ]
     },
@@ -313,7 +392,7 @@ const ServiceCard = styled(Card)(({ theme }) => ({
     },
 }));
 
-const CategoryChip = styled(Chip)<{ category: string }>(({ theme, category }) => {
+const CategoryChip = styled(Chip)<{ category: string }>(({ category }) => {
     const config = categoryConfig[category as keyof typeof categoryConfig];
     return {
         backgroundColor: alpha(config.color, 0.1),
@@ -348,7 +427,6 @@ const ServicesComponents: React.FC = () => {
     const theme = useTheme();
     const [templatesOpen, setTemplatesOpen] = useState(false);
     const [suppliersOpen, setSuppliersOpen] = useState(false);
-    const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
     const [expandedServices, setExpandedServices] = useState<string[]>([]);
 
     const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm<ServicesForm>({
@@ -427,8 +505,8 @@ const ServicesComponents: React.FC = () => {
         append(newService);
     }, [append]);
 
-    const addFromTemplate = useCallback((template: any) => {
-        template.services.forEach((templateService: any) => {
+    const addFromTemplate = useCallback((template: { services: ServiceItem[] }) => {
+        template.services.forEach((templateService: ServiceItem) => {
             const service: ServiceItem = {
                 id: Date.now().toString() + Math.random(),
                 category: templateService.category,
@@ -446,22 +524,26 @@ const ServicesComponents: React.FC = () => {
         setTemplatesOpen(false);
     }, [append]);
 
-    const addFromSupplier = useCallback((supplier: any) => {
-        const service: ServiceItem = {
-            id: Date.now().toString(),
-            category: supplier.category,
-            description: `${supplier.name} - ${supplier.type}`,
-            supplier: supplier.name,
-            quantity: 1,
-            unit: supplier.unit.split(' ')[1] || 'items',
-            unitCost: supplier.netPrice,
-            totalCost: supplier.netPrice,
-            markup: 20,
-            markupAmount: supplier.netPrice * 0.2,
-            finalPrice: supplier.netPrice * 1.2,
-            notes: supplier.notes,
-        };
-        append(service);
+    const addFromSupplier = useCallback((supplier: { name: string; services: ServiceItem[] }) => {
+        const services = supplier.services;
+        services.forEach((serviceItem) => {
+            const service: ServiceItem = {
+                id: Date.now().toString() + Math.random(),
+                category: serviceItem.category,
+                description: `${supplier.name} - ${serviceItem.description}`,
+                supplier: supplier.name,
+                quantity: 1,
+                unit: serviceItem.unit.split(' ')[1] || 'items',
+                unitCost: 100,
+                totalCost: serviceItem.totalCost,
+                markup: 20,
+                markupAmount: serviceItem.totalCost * 0.2,
+                finalPrice: serviceItem.totalCost * 1.2,
+                notes: serviceItem.notes
+            };
+            append(service);
+        });
+
         setSuppliersOpen(false);
     }, [append]);
 
@@ -477,7 +559,7 @@ const ServicesComponents: React.FC = () => {
         console.log('Services submitted:', { ...data, totals });
     };
 
-    const renderSupplierCard = (supplier: any) => (
+    const renderSupplierCard = (supplier: { id: string; name: string; category: string; rating: number; verified: boolean; services: ServiceItem[] }) => (
         <Card
             key={supplier.id}
             sx={{
@@ -497,12 +579,12 @@ const ServicesComponents: React.FC = () => {
                             {supplier.name}
                         </Typography>
                         <Typography variant="h6" color="primary.main" fontWeight={700}>
-                            €{supplier.netPrice}
+                            €{supplier.services.reduce((sum, svc) => sum + svc.totalCost, 0).toLocaleString()}
                         </Typography>
                     </Stack>
 
                     <Typography variant="caption" color="text.secondary">
-                        {supplier.type} • {supplier.unit}
+                        {supplier.name} • {supplier.category}
                     </Typography>
 
                     <Stack direction="row" alignItems="center" spacing={1}>
@@ -510,18 +592,18 @@ const ServicesComponents: React.FC = () => {
                             ⭐ {supplier.rating}
                         </Typography>
                         <Typography variant="caption" color="success.main">
-                            {supplier.commission}% commission
+                            {supplier.services[0].markup}% commission
                         </Typography>
                     </Stack>
 
-                    {supplier.notes && (
+                    {supplier.rating && (
                         <Typography variant="caption" color="text.secondary" sx={{
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: 'vertical',
                             overflow: 'hidden',
                         }}>
-                            {supplier.notes}
+                            {supplier.rating}
                         </Typography>
                     )}
                 </Stack>
@@ -544,7 +626,7 @@ const ServicesComponents: React.FC = () => {
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Grid container spacing={4}>
                     {/* Services List */}
-                    <Grid xs={12} lg={8}>
+                    <Grid>
                         <Stack spacing={3}>
                             {/* Quick Actions */}
                             <Paper sx={{ p: 3, backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
@@ -645,7 +727,7 @@ const ServicesComponents: React.FC = () => {
                                                     <Stack spacing={3}>
                                                         <Grid container spacing={2}>
                                                             {/* Category */}
-                                                            <Grid xs={12} md={3}>
+                                                            <Grid size={{ xs: 12, md: 3 }}>
                                                                 <Controller
                                                                     name={`services.${index}.category`}
                                                                     control={control}
@@ -676,7 +758,7 @@ const ServicesComponents: React.FC = () => {
                                                             </Grid>
 
                                                             {/* Quantity */}
-                                                            <Grid xs={6} md={2}>
+                                                            <Grid size={{ xs: 6, md: 2 }}>
                                                                 <Controller
                                                                     name={`services.${index}.quantity`}
                                                                     control={control}
@@ -699,7 +781,7 @@ const ServicesComponents: React.FC = () => {
                                                             </Grid>
 
                                                             {/* Unit */}
-                                                            <Grid xs={6} md={2}>
+                                                            <Grid size={{ xs: 6, md: 2 }}>
                                                                 <Controller
                                                                     name={`services.${index}.unit`}
                                                                     control={control}
@@ -719,7 +801,7 @@ const ServicesComponents: React.FC = () => {
                                                             </Grid>
 
                                                             {/* Unit Cost */}
-                                                            <Grid xs={6} md={2}>
+                                                            <Grid size={{ xs: 6, md: 2 }}>
                                                                 <Controller
                                                                     name={`services.${index}.unitCost`}
                                                                     control={control}
@@ -745,7 +827,7 @@ const ServicesComponents: React.FC = () => {
                                                             </Grid>
 
                                                             {/* Markup */}
-                                                            <Grid xs={6} md={3}>
+                                                            <Grid size={{ xs: 6, md: 3 }}>
                                                                 <Controller
                                                                     name={`services.${index}.markup`}
                                                                     control={control}
@@ -777,7 +859,7 @@ const ServicesComponents: React.FC = () => {
                                                             borderRadius: 1,
                                                         }}>
                                                             <Grid container spacing={2}>
-                                                                <Grid xs={3}>
+                                                                <Grid size={{ xs: 3 }}>
                                                                     <Typography variant="caption" color="text.secondary">
                                                                         Net Cost
                                                                     </Typography>
@@ -785,7 +867,7 @@ const ServicesComponents: React.FC = () => {
                                                                         €{(service?.totalCost || 0).toLocaleString()}
                                                                     </Typography>
                                                                 </Grid>
-                                                                <Grid xs={3}>
+                                                                <Grid size={{ xs: 3 }}>
                                                                     <Typography variant="caption" color="text.secondary">
                                                                         Markup
                                                                     </Typography>
@@ -793,7 +875,7 @@ const ServicesComponents: React.FC = () => {
                                                                         €{(service?.markupAmount || 0).toLocaleString()}
                                                                     </Typography>
                                                                 </Grid>
-                                                                <Grid xs={3}>
+                                                                <Grid size={{ xs: 3 }}>
                                                                     <Typography variant="caption" color="text.secondary">
                                                                         Margin
                                                                     </Typography>
@@ -801,7 +883,7 @@ const ServicesComponents: React.FC = () => {
                                                                         {margin.toFixed(1)}%
                                                                     </Typography>
                                                                 </Grid>
-                                                                <Grid xs={3}>
+                                                                <Grid size={{ xs: 3 }}>
                                                                     <Typography variant="caption" color="text.secondary">
                                                                         Final Price
                                                                     </Typography>
@@ -814,7 +896,7 @@ const ServicesComponents: React.FC = () => {
 
                                                         {/* Supplier & Notes */}
                                                         <Grid container spacing={2}>
-                                                            <Grid xs={12} md={6}>
+                                                            <Grid size={{ xs: 12, md: 6 }}>
                                                                 <Controller
                                                                     name={`services.${index}.supplier`}
                                                                     control={control}
@@ -829,7 +911,7 @@ const ServicesComponents: React.FC = () => {
                                                                     )}
                                                                 />
                                                             </Grid>
-                                                            <Grid xs={12} md={6}>
+                                                            <Grid size={{ xs: 12, md: 6 }}>
                                                                 <Controller
                                                                     name={`services.${index}.notes`}
                                                                     control={control}
@@ -855,7 +937,6 @@ const ServicesComponents: React.FC = () => {
 
                             {/* Add Service Button */}
                             <Button
-                                variant="dashed"
                                 startIcon={<AddOutlined />}
                                 onClick={addService}
                                 sx={{
@@ -873,7 +954,7 @@ const ServicesComponents: React.FC = () => {
                     </Grid>
 
                     {/* Summary Panel */}
-                    <Grid xs={12} lg={4}>
+                    <Grid size={{ xs: 12, lg: 4 }}>
                         <Card sx={{ position: 'sticky', top: 24 }}>
                             <CardContent>
                                 <Typography variant="h6" fontWeight={700} gutterBottom>
@@ -978,7 +1059,7 @@ const ServicesComponents: React.FC = () => {
                 <DialogContent>
                     <Grid container spacing={2}>
                         {serviceTemplates.map((template) => (
-                            <Grid xs={12} md={6} key={template.id}>
+                            <Grid size={{ xs: 12, md: 6 }} key={template.id}>
                                 <Card
                                     sx={{
                                         cursor: 'pointer',
@@ -1032,13 +1113,13 @@ const ServicesComponents: React.FC = () => {
                 <DialogContent>
                     <Grid container spacing={3}>
                         {Object.entries(supplierDatabase).map(([category, suppliers]) => (
-                            <Grid xs={12} key={category}>
+                            <Grid size={{ xs: 12 }} key={category}>
                                 <Typography variant="h6" fontWeight={600} gutterBottom sx={{ textTransform: 'capitalize' }}>
                                     {category}
                                 </Typography>
                                 <Grid container spacing={2}>
                                     {suppliers.map((supplier) => (
-                                        <Grid xs={12} md={6} lg={4} key={supplier.id}>
+                                        <Grid size={{ xs: 12, md: 6, lg: 4 }} key={supplier.id}>
                                             {renderSupplierCard(supplier)}
                                         </Grid>
                                     ))}
@@ -1056,3 +1137,4 @@ const ServicesComponents: React.FC = () => {
 };
 
 export default ServicesComponents;
+

@@ -115,3 +115,13 @@ export const StatusChip = styled(Chip)<{ status: string }>(({ theme, status }) =
         fontSize: '0.75rem',
     };
 });
+
+export const FormCard = styled(Card)(({ theme }) => ({
+    border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+    borderRadius: theme.spacing(2),
+    boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.04)}`,
+
+    '&:hover': {
+        boxShadow: `0 4px 16px ${alpha(theme.palette.primary.main, 0.08)}`,
+    },
+}));

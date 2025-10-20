@@ -1,14 +1,12 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
     Box,
-    Grid,
     Typography,
     Card,
     CardContent,
     Stack,
     Chip,
     Button,
-    IconButton,
     Alert,
     Divider,
     Paper,
@@ -19,7 +17,6 @@ import {
     InputLabel,
     Select,
     MenuItem,
-    Tooltip,
     alpha,
     useTheme,
     Dialog,
@@ -32,7 +29,7 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Badge,
+    Grid,
 } from '@mui/material';
 import {
     CalculateOutlined,
@@ -44,13 +41,8 @@ import {
     SaveOutlined,
     SendOutlined,
     VisibilityOutlined,
-    WarningOutlined,
-    CheckCircleOutlined,
     InfoOutlined,
-    AttachMoneyOutlined,
     CalendarTodayOutlined,
-    SwapHorizOutlined,
-    PlayArrowOutlined,
     AutoGraphOutlined,
     ThumbUpOutlined,
     ThumbDownOutlined,
@@ -389,7 +381,7 @@ const SummaryPriceBreakdown: React.FC = () => {
 
             <Grid container spacing={4}>
                 {/* Quote Overview */}
-                <Grid xs={12} lg={8}>
+                <Grid item xs={12} lg={8}>
                     <Stack spacing={4}>
                         {/* Quote Header */}
                         <Card>
@@ -896,3 +888,4 @@ const SummaryPriceBreakdown: React.FC = () => {
 };
 
 export default SummaryPriceBreakdown;
+
