@@ -1,0 +1,1 @@
+export type PaymentPlan = 'free' | 'pro' | 'enterprise';
