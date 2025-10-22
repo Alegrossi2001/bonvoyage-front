@@ -66,7 +66,7 @@ const ChooseTemplate: React.FC<ChooseTemplateProps> = ({
             filtered = filtered.filter(quote => quote.status === statusFilter);
         }
 
-        return filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }, [searchTerm, dateFilter, statusFilter]);
 
     const handleOptionSelect = useCallback((option: 'new' | 'clone') => {

@@ -10,9 +10,7 @@ import CustomerRequirements from "./ui/Step1/CustomerRequirements";
 import ServicesComponents from "./ui/Step2/Services";
 import SummaryPriceBreakdown from "./ui/Step3/SummaryPriceBreakdown";
 import ReviewAndSend from "./ui/Step4/ReviewAndSend";
-import DayByDayPlanning from "./ui/Step2/DayByDay";
 
-const DAY_BY_DAY_VERSION = true;
 
 const CreateQuotation = () => {
 
@@ -33,11 +31,7 @@ const CreateQuotation = () => {
                 return <CustomerRequirements />
 
             case 2:
-                if (DAY_BY_DAY_VERSION) {
-                    return <DayByDayPlanning />
-                } else {
-                    return <ServicesComponents />
-                }
+                return <ServicesComponents />;
 
             case 3:
                 return <SummaryPriceBreakdown />;
