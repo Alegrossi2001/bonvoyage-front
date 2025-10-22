@@ -46,7 +46,6 @@ import {
     ExpandMoreOutlined,
     CheckCircleOutlined,
     CalendarTodayOutlined,
-    AccessTimeOutlined,
     ContentCopyOutlined,
     DownloadOutlined,
     InfoOutlined,
@@ -56,9 +55,6 @@ import {
     AutorenewOutlined,
     EventAvailableOutlined,
     ExpandLessOutlined,
-    Schedule,
-    Timer,
-    Alarm,
     Drafts,
     Send,
 } from '@mui/icons-material';
@@ -170,8 +166,10 @@ const mockQuoteData = {
 };
 
 const ActivityLogCard = styled(Card)(({ theme }) => ({
-    border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-    borderRadius: theme.spacing(2),
+    border: '1px solid #e0e0e0',
+    borderRadius: '12px',
+    padding: '25px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
     '& .MuiTimelineItem-root': {
         '&::before': {
             display: 'none',
@@ -184,7 +182,7 @@ const ActivityLogCard = styled(Card)(({ theme }) => ({
     '& .MuiTimelineDot-root': {
         boxShadow: 'none',
         margin: 0,
-        padding: theme.spacing(1),
+        padding: theme.spacing(1.5),
     },
 }));
 
@@ -194,11 +192,18 @@ const VersionChip = styled(Chip)(({ theme }) => ({
     fontFamily: 'monospace',
     fontWeight: 700,
     fontSize: '0.875rem',
+    border: '2px solid',
+    borderColor: theme.palette.primary.main,
+    boxShadow: '0 2px 6px rgba(25,118,210,0.2)',
 }));
 
-const CountdownCard = styled(Card)(({ theme }) => ({
-    background: `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.1)}, ${alpha(theme.palette.error.main, 0.1)})`,
-    border: `1px solid ${alpha(theme.palette.warning.main, 0.3)}`,
+const CountdownCard = styled(Card)(() => ({
+    background: 'linear-gradient(135deg, #fff3e0 0%, #ffebee 100%)',
+    border: '2px solid #ff9800',
+    borderRadius: '16px',
+    padding: '30px',
+    boxShadow: '0 4px 16px rgba(255,152,0,0.15)',
+    marginBottom: '25px',
 }));
 
 interface EmailTemplate {
@@ -348,21 +353,6 @@ const ReviewAndSend: React.FC = () => {
         }
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'draft':
-                return 'warning';
-            case 'sent':
-                return 'info';
-            case 'approved':
-                return 'success';
-            case 'rejected':
-                return 'error';
-            default:
-                return 'default';
-        }
-    };
-
     const renderEditableSection = (section: string, title: string, content: React.ReactNode) => (
         <Card sx={{ mb: 2 }}>
             <CardContent>
@@ -386,30 +376,40 @@ const ReviewAndSend: React.FC = () => {
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Box sx={{ maxWidth: 1400, mx: 'auto', p: 4 }}>
-                {/* Header */}
+                {/* Enhanced Header */}
                 <Box sx={{ mb: 4 }}>
                     <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={2}>
                         <Box>
                             <Typography variant="h4" fontWeight={700} gutterBottom>
                                 Review & Send Quote
                             </Typography>
-                            <Typography variant="body1" color="text.secondary">
+                            <Typography variant="body1" sx={{ color: '#666' }}>
                                 Final review before sending to client
                             </Typography>
                         </Box>
 
-                        <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
                             <VersionChip
                                 label={quoteVersion}
                                 icon={<ContentCopyOutlined />}
                             />
                             <Chip
-                                label={quoteStatus}
-                                color={getStatusColor(quoteStatus) as "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning"}
-                                variant="filled"
+                                label={quoteStatus.toUpperCase()}
+                                sx={{
+                                    background: quoteStatus === 'draft' ? '#fff3e0' :
+                                        quoteStatus === 'sent' ? '#e3f2fd' :
+                                            quoteStatus === 'approved' ? '#e8f5e9' : '#ffebee',
+                                    color: quoteStatus === 'draft' ? '#e65100' :
+                                        quoteStatus === 'sent' ? '#1976d2' :
+                                            quoteStatus === 'approved' ? '#2e7d32' : '#c62828',
+                                    fontWeight: 600,
+                                    padding: '6px 14px',
+                                    borderRadius: '20px',
+                                    fontSize: 11,
+                                }}
                             />
-                            <Typography variant="caption" color="text.secondary">
-                                ID: {mockQuoteData.id}
+                            <Typography variant="caption" sx={{ color: '#999', fontSize: 11 }}>
+                                Quote #{mockQuoteData.id}
                             </Typography>
                         </Stack>
                     </Stack>
@@ -419,17 +419,29 @@ const ReviewAndSend: React.FC = () => {
                     {/* Main Content */}
                     <Grid size={12}>
                         <Stack spacing={3}>
-                            {/* Quote Timer/Status */}
+                            {/* Enhanced Countdown Card */}
                             <CountdownCard>
-                                <CardContent>
+                                <CardContent sx={{ p: 0 }}>
                                     <Grid container spacing={3}>
                                         <Grid>
                                             <Stack alignItems="center" spacing={1}>
-                                                <Timer color="warning" sx={{ fontSize: 32 }} />
-                                                <Typography variant="h6" fontWeight={700}>
+                                                <Box sx={{
+                                                    width: 56,
+                                                    height: 56,
+                                                    borderRadius: '50%',
+                                                    background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
+                                                    boxShadow: '0 4px 12px rgba(255,152,0,0.3)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    mb: 1.5
+                                                }}>
+                                                    <Typography sx={{ fontSize: 24 }}>⏱</Typography>
+                                                </Box>
+                                                <Typography sx={{ fontSize: 32, fontWeight: 700, color: '#333', mb: 0.75 }}>
                                                     {timeCalculations.daysUntilExpiry}
                                                 </Typography>
-                                                <Typography variant="caption" color="text.secondary" textAlign="center">
+                                                <Typography sx={{ fontSize: 11, color: '#666', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'center' }}>
                                                     Days until expiry
                                                 </Typography>
                                             </Stack>
@@ -437,11 +449,23 @@ const ReviewAndSend: React.FC = () => {
 
                                         <Grid>
                                             <Stack alignItems="center" spacing={1}>
-                                                <AccessTimeOutlined color="info" sx={{ fontSize: 32 }} />
-                                                <Typography variant="h6" fontWeight={700}>
+                                                <Box sx={{
+                                                    width: 56,
+                                                    height: 56,
+                                                    borderRadius: '50%',
+                                                    background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
+                                                    boxShadow: '0 4px 12px rgba(255,152,0,0.3)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    mb: 1.5
+                                                }}>
+                                                    <Typography sx={{ fontSize: 24 }}>🕐</Typography>
+                                                </Box>
+                                                <Typography sx={{ fontSize: 32, fontWeight: 700, color: '#333', mb: 0.75 }}>
                                                     {timeCalculations.ageInHours}h
                                                 </Typography>
-                                                <Typography variant="caption" color="text.secondary" textAlign="center">
+                                                <Typography sx={{ fontSize: 11, color: '#666', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'center' }}>
                                                     Quote age
                                                 </Typography>
                                             </Stack>
@@ -449,11 +473,23 @@ const ReviewAndSend: React.FC = () => {
 
                                         <Grid>
                                             <Stack alignItems="center" spacing={1}>
-                                                <Alarm color="primary" sx={{ fontSize: 32 }} />
-                                                <Typography variant="h6" fontWeight={700}>
+                                                <Box sx={{
+                                                    width: 56,
+                                                    height: 56,
+                                                    borderRadius: '50%',
+                                                    background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
+                                                    boxShadow: '0 4px 12px rgba(255,152,0,0.3)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    mb: 1.5
+                                                }}>
+                                                    <Typography sx={{ fontSize: 24 }}>🔔</Typography>
+                                                </Box>
+                                                <Typography sx={{ fontSize: 32, fontWeight: 700, color: '#333', mb: 0.75 }}>
                                                     {timeCalculations.daysUntilReminder}
                                                 </Typography>
-                                                <Typography variant="caption" color="text.secondary" textAlign="center">
+                                                <Typography sx={{ fontSize: 11, color: '#666', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'center' }}>
                                                     Days to reminder
                                                 </Typography>
                                             </Stack>
@@ -461,11 +497,23 @@ const ReviewAndSend: React.FC = () => {
 
                                         <Grid>
                                             <Stack alignItems="center" spacing={1}>
-                                                <Schedule color="success" sx={{ fontSize: 32 }} />
-                                                <Typography variant="h6" fontWeight={700}>
-                                                    {dayjs(mockQuoteData.estimatedResponseTime).fromNow()}
+                                                <Box sx={{
+                                                    width: 56,
+                                                    height: 56,
+                                                    borderRadius: '50%',
+                                                    background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
+                                                    boxShadow: '0 4px 12px rgba(255,152,0,0.3)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    mb: 1.5
+                                                }}>
+                                                    <Typography sx={{ fontSize: 24 }}>📅</Typography>
+                                                </Box>
+                                                <Typography sx={{ fontSize: 32, fontWeight: 700, color: '#333', mb: 0.75 }}>
+                                                    {dayjs(mockQuoteData.estimatedResponseTime).fromNow(true)}
                                                 </Typography>
-                                                <Typography variant="caption" color="text.secondary" textAlign="center">
+                                                <Typography sx={{ fontSize: 11, color: '#666', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'center' }}>
                                                     Expected response
                                                 </Typography>
                                             </Stack>
@@ -473,14 +521,55 @@ const ReviewAndSend: React.FC = () => {
                                     </Grid>
 
                                     {timeCalculations.isExpiringSoon && (
-                                        <Alert severity="warning" sx={{ mt: 2 }}>
+                                        <Alert
+                                            severity="warning"
+                                            sx={{
+                                                mt: 2.5,
+                                                background: 'rgba(255,255,255,0.9)',
+                                                border: '1px solid #ff9800',
+                                                borderRadius: '8px',
+                                                padding: '12px 16px',
+                                                fontSize: 13,
+                                                color: '#e65100'
+                                            }}
+                                            icon={<span>⚠️</span>}
+                                        >
                                             Quote expires in {timeCalculations.daysUntilExpiry} days! Consider extending validity or following up.
                                         </Alert>
                                     )}
 
                                     {timeCalculations.isOld && quoteStatus === 'draft' && (
-                                        <Alert severity="info" sx={{ mt: 2 }}>
+                                        <Alert
+                                            severity="info"
+                                            sx={{
+                                                mt: 2.5,
+                                                background: 'rgba(255,255,255,0.9)',
+                                                border: '1px solid #ff9800',
+                                                borderRadius: '8px',
+                                                padding: '12px 16px',
+                                                fontSize: 13,
+                                                color: '#e65100'
+                                            }}
+                                        >
                                             This quote is {timeCalculations.ageInDays} days old. Consider sending it soon to maintain relevance.
+                                        </Alert>
+                                    )}
+
+                                    {quoteStatus === 'draft' && timeCalculations.ageInHours < 4 && (
+                                        <Alert
+                                            severity="info"
+                                            sx={{
+                                                mt: 2.5,
+                                                background: 'rgba(255,255,255,0.9)',
+                                                border: '1px solid #ff9800',
+                                                borderRadius: '8px',
+                                                padding: '12px 16px',
+                                                fontSize: 13,
+                                                color: '#e65100'
+                                            }}
+                                            icon={<span>⚡</span>}
+                                        >
+                                            Pro Tip: Quotes sent within 4 hours have 34% higher acceptance rates
                                         </Alert>
                                     )}
                                 </CardContent>

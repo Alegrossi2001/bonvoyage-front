@@ -1,9 +1,12 @@
+import type { TripType } from "../../../../interfaces/Values/Plans";
+
 export interface Customer {
     id?: string;
     name: string;
-    email: string;
+    email?: string;
     phone?: string;
     company?: string;
     address?: string;
     notes?: string;
+    type?: TripType;
 }

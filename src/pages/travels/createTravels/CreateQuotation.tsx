@@ -10,6 +10,7 @@ import CustomerRequirements from "./ui/Step1/CustomerRequirements";
 import ServicesComponents from "./ui/Step2/Services";
 import SummaryPriceBreakdown from "./ui/Step3/SummaryPriceBreakdown";
 import ReviewAndSend from "./ui/Step4/ReviewAndSend";
+import { useStep1 } from "./logic/useStep1";
 
 
 const CreateQuotation = () => {
@@ -17,6 +18,7 @@ const CreateQuotation = () => {
     const theme = useTheme();
     const stepValidation = useStepValidation();
     const { steps, activeStep, handleNext, handleBack } = useStepper(stepValidation);
+    const { onSubmit: onSubmitStep1, handleClientSelect, watchedValues, errors, control } = useStep1();
 
     const renderStepContent = () => {
         switch (activeStep) {
@@ -28,7 +30,14 @@ const CreateQuotation = () => {
                     }}
                 />;
             case 1:
-                return <CustomerRequirements />
+                return <CustomerRequirements
+                    theme={theme}
+                    onSubmit={onSubmitStep1}
+                    handleClientSelect={handleClientSelect}
+                    watchedValues={watchedValues}
+                    control={control}
+                    errors={errors}
+                />
 
             case 2:
                 return <ServicesComponents />;

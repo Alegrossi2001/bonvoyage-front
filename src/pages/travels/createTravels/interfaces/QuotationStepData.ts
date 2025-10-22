@@ -12,10 +12,13 @@ export interface QuotationStepData {
         customer: Partial<Customer>;
         tripDetails: {
             tripName: string;
-            destination: string;
+            destinations: string[];
             startDate: string;
             endDate: string;
             participants: number;
+            numberOfGroups?: number;
+            groupSize?: number;
+            tripType?: string;
         };
         requirements: RequirementItem[];
     };

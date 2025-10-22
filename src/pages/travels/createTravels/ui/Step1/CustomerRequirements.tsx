@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useCallback, useMemo } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import React, { useState, useMemo } from 'react';
+import { Controller, type Control, type FieldErrors } from 'react-hook-form';
 import {
     Box,
     Typography,
@@ -10,11 +10,9 @@ import {
     CardContent,
     Stack,
     Chip,
-    IconButton,
     Alert,
     InputAdornment,
     alpha,
-    useTheme,
     Grid,
 } from '@mui/material';
 import {
@@ -24,30 +22,18 @@ import {
     LocationOnOutlined,
     CalendarTodayOutlined,
     GroupOutlined,
-    StarOutlined,
-    StarBorderOutlined,
     InfoOutlined,
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { FormCard } from '../Primitives';
-
-// Form data interface
-interface CustomerRequirementsForm {
-    clientName: string;
-    contactPerson: string;
-    tripTitle: string;
-    destinations: string[];
-    dateFrom: Dayjs | null;
-    dateTo: Dayjs | null;
-    numberOfTravellers: number;
-    numberOfGroups?: number;
-    groupSize?: number;
-    tripType: string;
-    specialRequirements?: string;
-}
+import CustomerDropdown from './CustomerDropdown';
+import type { Theme } from '@mui/system';
+import type { Customer } from '../../interfaces/Customer';
+import type { QuotationStepData } from '../../interfaces/QuotationStepData';
+import renderClientOption from './RenderClientOption';
 
 // Mock data - replace with API calls
 const mockClients = [
@@ -124,37 +110,18 @@ const popularDestinations = [
     'Santiago de Compostela, Spain',
 ];
 
-const CustomerRequirements: React.FC = () => {
-    const theme = useTheme();
+interface CustomerRequirementsProps {
+    theme: Theme;
+    onSubmit: () => void;
+    watchedValues: any;
+    handleClientSelect: (client: Customer) => void;
+    control: Control<Partial<QuotationStepData>>
+    errors: FieldErrors<Partial<QuotationStepData>>;
+}
+
+const CustomerRequirements: React.FC<CustomerRequirementsProps> = ({ theme, onSubmit, watchedValues, handleClientSelect, control, errors }) => {
     const [clientSearch, setClientSearch] = useState('');
-    const [favoriteClients, setFavoriteClients] = useState<string[]>(
-        mockClients.filter(c => c.isFavorite).map(c => c.id)
-    );
 
-    const {
-        control,
-        handleSubmit,
-        watch,
-        setValue,
-        formState: { errors }
-    } = useForm<CustomerRequirementsForm>({
-        defaultValues: {
-            clientName: '',
-            contactPerson: '',
-            tripTitle: '',
-            destinations: [],
-            dateFrom: null,
-            dateTo: null,
-            numberOfTravellers: 1,
-            numberOfGroups: undefined,
-            groupSize: undefined,
-            tripType: '',
-            specialRequirements: '',
-        },
-        mode: 'onChange'
-    });
-
-    const watchedValues = watch();
     const selectedClient = mockClients.find(c => c.name === watchedValues.clientName);
 
     // Calculate trip duration
@@ -174,78 +141,8 @@ const CustomerRequirements: React.FC = () => {
         );
     }, [clientSearch]);
 
-    const handleClientSelect = useCallback((client: any) => {
-        if (client) {
-            setValue('clientName', client.name);
-            setValue('contactPerson', client.contactPerson);
+    const renderClientOptions = renderClientOption;
 
-            // Auto-suggest trip title based on client type and current date
-            const month = dayjs().format('MMMM');
-            const year = dayjs().year();
-            let suggestedTitle = '';
-
-            switch (client.type) {
-                case 'School':
-                    suggestedTitle = `${month} ${year} Educational Trip`;
-                    break;
-                case 'Religious':
-                    suggestedTitle = `${month} ${year} Pilgrimage`;
-                    break;
-                case 'Corporate':
-                    suggestedTitle = `${month} ${year} Corporate Event`;
-                    break;
-                default:
-                    suggestedTitle = `${month} ${year} Trip`;
-            }
-
-            if (!watchedValues.tripTitle) {
-                setValue('tripTitle', suggestedTitle);
-            }
-        }
-    }, [setValue, watchedValues.tripTitle]);
-
-    const toggleFavoriteClient = useCallback((clientId: string) => {
-        setFavoriteClients(prev =>
-            prev.includes(clientId)
-                ? prev.filter(id => id !== clientId)
-                : [...prev, clientId]
-        );
-    }, []);
-
-    const onSubmit = (data: CustomerRequirementsForm) => {
-        console.log('Form submitted:', data);
-        // Handle form submission - pass to parent component or API
-    };
-
-    const renderClientOption = (props: any, option: any) => (
-        <Box component="li" {...props}>
-            <Stack direction="row" alignItems="center" spacing={2} width="100%">
-                <Box>
-                    <Typography variant="subtitle2" fontWeight={600}>
-                        {option.name}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                        {option.contactPerson} • {option.previousTrips} previous trips
-                    </Typography>
-                </Box>
-                <Box sx={{ ml: 'auto' }}>
-                    <IconButton
-                        size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavoriteClient(option.id);
-                        }}
-                    >
-                        {favoriteClients.includes(option.id) ? (
-                            <StarOutlined color="warning" fontSize="small" />
-                        ) : (
-                            <StarBorderOutlined fontSize="small" />
-                        )}
-                    </IconButton>
-                </Box>
-            </Stack>
-        </Box>
-    );
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -260,7 +157,7 @@ const CustomerRequirements: React.FC = () => {
                     </Typography>
                 </Box>
 
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <form onSubmit={onSubmit}>
                     <Stack spacing={4}>
                         {/* Client Information */}
                         <FormCard>
@@ -273,56 +170,17 @@ const CustomerRequirements: React.FC = () => {
                                 </Stack>
 
                                 <Grid container spacing={3}>
-                                    <Grid size={8}>
-                                        <Controller
-                                            name="clientName"
-                                            control={control}
-                                            rules={{ required: 'Client name is required' }}
-                                            render={({ field }) => (
-                                                <Autocomplete
-                                                    {...field}
-                                                    options={filteredClients}
-                                                    getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
-                                                    renderOption={renderClientOption}
-                                                    freeSolo
-                                                    filterOptions={(options, { inputValue }) =>
-                                                        options.filter(option =>
-                                                            option.name.toLowerCase().includes(inputValue.toLowerCase())
-                                                        )
-                                                    }
-                                                    onInputChange={(_, value) => setClientSearch(value)}
-                                                    onChange={(_, value) => {
-                                                        if (typeof value === 'object' && value !== null) {
-                                                            handleClientSelect(value);
-                                                        } else {
-                                                            field.onChange(value);
-                                                        }
-                                                    }}
-                                                    renderInput={(params) => (
-                                                        <TextField
-                                                            {...params}
-                                                            label="Client/Agency Name"
-                                                            placeholder="Start typing to search existing clients..."
-                                                            error={!!errors.clientName}
-                                                            helperText={errors.clientName?.message}
-                                                            InputProps={{
-                                                                ...params.InputProps,
-                                                                startAdornment: (
-                                                                    <InputAdornment position="start">
-                                                                        <BusinessOutlined color="action" />
-                                                                    </InputAdornment>
-                                                                ),
-                                                            }}
-                                                        />
-                                                    )}
-                                                />
-                                            )}
-                                        />
-                                    </Grid>
-
+                                    <CustomerDropdown
+                                        control={control}
+                                        errors={errors}
+                                        filteredClients={filteredClients}
+                                        setClientSearch={setClientSearch}
+                                        handleClientSelect={handleClientSelect}
+                                        renderClientOption={renderClientOptions}
+                                    />
                                     <Grid size={{ xs: 12, md: 4 }}>
                                         <Controller
-                                            name="contactPerson"
+                                            name="step1.customer.name"
                                             control={control}
                                             render={({ field }) => (
                                                 <TextField
@@ -386,7 +244,7 @@ const CustomerRequirements: React.FC = () => {
                                 <Grid container spacing={3}>
                                     <Grid size={{ xs: 12 }}>
                                         <Controller
-                                            name="tripTitle"
+                                            name="step1.tripDetails.tripName"
                                             control={control}
                                             rules={{ required: 'Trip title is required' }}
                                             render={({ field }) => (
@@ -395,8 +253,8 @@ const CustomerRequirements: React.FC = () => {
                                                     fullWidth
                                                     label="Trip Title / Reference"
                                                     placeholder="e.g., Spring 2024 Educational Trip to Rome"
-                                                    error={!!errors.tripTitle}
-                                                    helperText={errors.tripTitle?.message || 'This helps identify the quote in your system'}
+                                                    error={!!errors.step1?.tripDetails?.tripName}
+                                                    helperText={errors.step1?.tripDetails?.tripName?.message || 'This helps identify the quote in your system'}
                                                 />
                                             )}
                                         />
@@ -404,11 +262,11 @@ const CustomerRequirements: React.FC = () => {
 
                                     <Grid size={{ xs: 12 }}>
                                         <Controller
-                                            name="destinations"
+                                            name="step1.tripDetails.destinations"
                                             control={control}
                                             rules={{
                                                 required: 'At least one destination is required',
-                                                validate: (value) => value.length > 0 || 'At least one destination is required'
+                                                validate: (value) => value ? value.length > 0 || 'At least one destination is required' : true,
                                             }}
                                             render={({ field }) => (
                                                 <Autocomplete
@@ -431,8 +289,8 @@ const CustomerRequirements: React.FC = () => {
                                                             {...params}
                                                             label="Destination(s)"
                                                             placeholder="Add destinations..."
-                                                            error={!!errors.destinations}
-                                                            helperText={errors.destinations?.message || 'Add multiple destinations for multi-city trips'}
+                                                            error={!!errors.step1?.tripDetails?.destinations}
+                                                            helperText={errors.step1?.tripDetails?.destinations?.message || 'Add multiple destinations for multi-city trips'}
                                                             InputProps={{
                                                                 ...params.InputProps,
                                                                 startAdornment: (
@@ -454,19 +312,21 @@ const CustomerRequirements: React.FC = () => {
 
                                     <Grid size={{ xs: 12, md: 6 }}>
                                         <Controller
-                                            name="dateFrom"
+                                            name="step1.tripDetails.startDate"
                                             control={control}
                                             rules={{ required: 'Start date is required' }}
                                             render={({ field }) => (
                                                 <DatePicker
                                                     {...field}
+                                                    value={field.value ? dayjs(field.value) : null}
+                                                    onChange={(date) => field.onChange(date?.toISOString())}
                                                     label="Date From"
                                                     minDate={dayjs()}
                                                     slotProps={{
                                                         textField: {
                                                             fullWidth: true,
-                                                            error: !!errors.dateFrom,
-                                                            helperText: errors.dateFrom?.message,
+                                                            error: !!errors.step1?.tripDetails?.startDate,
+                                                            helperText: errors.step1?.tripDetails?.startDate?.message,
                                                             InputProps: {
                                                                 startAdornment: (
                                                                     <InputAdornment position="start">
@@ -479,43 +339,45 @@ const CustomerRequirements: React.FC = () => {
                                                 />
                                             )}
                                         />
-                                    </Grid>
-
-                                    <Grid size={{ xs: 12, md: 6 }}>
-                                        <Controller
-                                            name="dateTo"
-                                            control={control}
-                                            rules={{
-                                                required: 'End date is required',
-                                                validate: (value) => {
-                                                    if (watchedValues.dateFrom && value) {
-                                                        return dayjs(value).isAfter(dayjs(watchedValues.dateFrom)) || 'End date must be after start date';
+                                        <Grid size={{ xs: 12, md: 6 }}>
+                                            <Controller
+                                                name="step1.tripDetails.endDate"
+                                                control={control}
+                                                rules={{
+                                                    required: 'End date is required',
+                                                    validate: (value) => {
+                                                        if (watchedValues.dateFrom && value) {
+                                                            return dayjs(value).isAfter(dayjs(watchedValues.dateFrom)) || 'End date must be after start date';
+                                                        }
+                                                        return true;
                                                     }
-                                                    return true;
-                                                }
-                                            }}
-                                            render={({ field }) => (
-                                                <DatePicker
-                                                    {...field}
-                                                    label="Date To"
-                                                    minDate={watchedValues.dateFrom ? dayjs(watchedValues.dateFrom).add(1, 'day') : dayjs()}
-                                                    slotProps={{
-                                                        textField: {
-                                                            fullWidth: true,
-                                                            error: !!errors.dateTo,
-                                                            helperText: errors.dateTo?.message || (tripDuration > 0 ? `${tripDuration} day${tripDuration > 1 ? 's' : ''}` : ''),
-                                                            InputProps: {
-                                                                startAdornment: (
-                                                                    <InputAdornment position="start">
-                                                                        <CalendarTodayOutlined color="action" />
-                                                                    </InputAdornment>
-                                                                ),
-                                                            },
-                                                        }
-                                                    }}
-                                                />
-                                            )}
-                                        />
+                                                }}
+                                                render={({ field }) => (
+                                                    <DatePicker
+                                                        {...field}
+                                                        value={field.value ? dayjs(field.value) : null}
+                                                        onChange={(date) => field.onChange(date?.toISOString())}
+                                                        label="Date To"
+                                                        minDate={watchedValues.dateFrom ? dayjs(watchedValues.dateFrom).add(1, 'day') : dayjs()}
+                                                        slotProps={{
+                                                            textField: {
+                                                                fullWidth: true,
+                                                                error: !!errors.step1?.tripDetails?.endDate,
+                                                                helperText: errors.step1?.tripDetails?.endDate?.message || (tripDuration > 0 ? `${tripDuration} day${tripDuration > 1 ? 's' : ''}` : ''),
+                                                                InputProps: {
+                                                                    startAdornment: (
+                                                                        <InputAdornment position="start">
+                                                                            <CalendarTodayOutlined color="action" />
+                                                                        </InputAdornment>
+                                                                    ),
+                                                                },
+                                                            }
+                                                        }}
+                                                    />
+                                                )}
+                                            />
+                                        </Grid>
+
                                     </Grid>
                                 </Grid>
                             </CardContent>
@@ -534,7 +396,7 @@ const CustomerRequirements: React.FC = () => {
                                 <Grid container spacing={3}>
                                     <Grid size={{ xs: 12, md: 4 }}>
                                         <Controller
-                                            name="numberOfTravellers"
+                                            name="step1.tripDetails.participants"
                                             control={control}
                                             rules={{
                                                 required: 'Number of travellers is required',
@@ -546,8 +408,8 @@ const CustomerRequirements: React.FC = () => {
                                                     fullWidth
                                                     type="number"
                                                     label="Total Number of Travellers"
-                                                    error={!!errors.numberOfTravellers}
-                                                    helperText={errors.numberOfTravellers?.message}
+                                                    error={!!errors.step1?.tripDetails?.participants}
+                                                    helperText={errors.step1?.tripDetails?.participants?.message}
                                                     InputProps={{
                                                         startAdornment: (
                                                             <InputAdornment position="start">
@@ -564,7 +426,7 @@ const CustomerRequirements: React.FC = () => {
 
                                     <Grid size={{ xs: 12, md: 4 }}>
                                         <Controller
-                                            name="numberOfGroups"
+                                            name="step1.tripDetails.numberOfGroups"
                                             control={control}
                                             render={({ field }) => (
                                                 <TextField
@@ -585,7 +447,7 @@ const CustomerRequirements: React.FC = () => {
 
                                     <Grid size={{ xs: 12, md: 4 }}>
                                         <Controller
-                                            name="groupSize"
+                                            name="step1.tripDetails.groupSize"
                                             control={control}
                                             render={({ field }) => (
                                                 <TextField
@@ -618,7 +480,7 @@ const CustomerRequirements: React.FC = () => {
                                 </Typography>
 
                                 <Controller
-                                    name="tripType"
+                                    name="step1.tripDetails.tripType"
                                     control={control}
                                     rules={{ required: 'Trip type is required' }}
                                     render={({ field }) => (
@@ -659,9 +521,9 @@ const CustomerRequirements: React.FC = () => {
                                         </Grid>
                                     )}
                                 />
-                                {errors.tripType && (
+                                {errors.step1?.tripDetails?.tripType && (
                                     <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
-                                        {errors.tripType.message}
+                                        {errors.step1.tripDetails.tripType.message}
                                     </Typography>
                                 )}
                             </CardContent>
@@ -675,7 +537,7 @@ const CustomerRequirements: React.FC = () => {
                                 </Typography>
 
                                 <Controller
-                                    name="specialRequirements"
+                                    name="step1.requirements"
                                     control={control}
                                     render={({ field }) => (
                                         <TextField

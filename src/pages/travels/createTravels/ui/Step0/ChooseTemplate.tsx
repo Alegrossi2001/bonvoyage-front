@@ -48,7 +48,7 @@ const ChooseTemplate: React.FC<ChooseTemplateProps> = ({
         if (searchTerm) {
             filtered = filtered.filter(quote =>
                 quote.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                quote.customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                quote.customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 quote.destinations.some(dest => dest.toLowerCase().includes(searchTerm.toLowerCase()))
             );
         }

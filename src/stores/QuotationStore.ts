@@ -342,6 +342,7 @@ export const useQuotationStore = create<QuotationStore>()(
                                 meals: 0,
                                 guides: 0,
                                 other: 0,
+                                sightseeing: 0,
                             },
                         };
                     }
