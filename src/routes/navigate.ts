@@ -54,6 +54,7 @@ const useBonVoyageNavigate = () => {
     const quickNav = {
         dashboard: () => routeNavigate('/dashboard'),
         login: () => navigate('/auth/signin'),
+        confirmedTravels: () => routeNavigate('/bookings/confirmed'),
         back: () => navigate(-1),
         forward: () => navigate(1),
     };

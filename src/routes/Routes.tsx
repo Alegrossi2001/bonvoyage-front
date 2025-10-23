@@ -3,6 +3,7 @@ import React from 'react';
 import {
     BookmarkAddOutlined,
     BookOnline,
+    CheckBoxOutlined,
     Dashboard as DashboardIcon,
     Email,
     TrendingUp,
@@ -10,6 +11,8 @@ import {
 } from "@mui/icons-material";
 import type { Role } from '../interfaces/Auth/Auth';
 import CreateQuotation from '../pages/travels/createTravels/CreateQuotation';
+import MyQuotations from '../pages/travels/myTravels/MyQuotations';
+import ConfirmedQuotations from '../pages/travels/confirmedTravels/ConfirmedQuotations';
 
 export interface NavigationalRoutes {
     type: "collapse" | "title" | "divider" | "hidden";
@@ -81,8 +84,16 @@ export const NavigationalRoutes: NavigationalRoutes[] = [
                 key: "my-bookings",
                 route: "/bookings/my",
                 icon: <BookmarkAddOutlined />,
-                component: <div>My Bookings Page</div>,
+                component: <MyQuotations />
             },
+            {
+                type: "collapse",
+                name: "Viaggi confermati",
+                key: "confirmed-bookings",
+                route: "/bookings/confirmed",
+                icon: <CheckBoxOutlined />,
+                component: <ConfirmedQuotations />
+            }
         ],
     },
     {

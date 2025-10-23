@@ -1,5 +1,25 @@
-import type { PreviousQuotation } from "../pages/travels/createTravels/interfaces/Quotation";
+import type { PreviousQuotation, Quotation } from "../pages/travels/createTravels/interfaces/Quotation";
 
+export const mockQuotations: Quotation[] = [
+    {
+        id: 'Q001',
+        version: 1,
+        status: 'draft',
+        customer: { id: 'C001', name: 'Sarah Johnson', email: 'sarah@email.com' }
+    },
+    {
+        id: 'Q002',
+        version: 2,
+        status: 'sent',
+        customer: { id: 'C002', name: 'Mike Chen', email: 'mike@email.com' }
+    },
+    {
+        id: 'Q003',
+        version: 1,
+        status: 'approved',
+        customer: { id: 'C003', name: 'Anna Mueller', email: 'anna@email.com' }
+    }
+];
 export const mockPreviousQuotes: PreviousQuotation[] = [
     {
         id: 'Q001',
