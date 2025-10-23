@@ -2,6 +2,7 @@ import { styled } from "@mui/system";
 import { Paper, Box, Card } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { Chip } from "../../../../assets/atoms/Status";
+import { categoryConfig } from "../interfaces/constants";
 
 export const QuotationContainer = styled(Paper)(({ theme }) => ({
     height: '100vh',
@@ -125,3 +126,45 @@ export const FormCard = styled(Card)(({ theme }) => ({
         boxShadow: `0 4px 16px ${alpha(theme.palette.primary.main, 0.08)}`,
     },
 }));
+
+export const ServiceCard = styled(Card)(({ theme }) => ({
+    border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+    borderRadius: theme.spacing(2),
+    transition: 'all 0.2s ease-in-out',
+
+    '&:hover': {
+        boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.12)}`,
+        borderColor: alpha(theme.palette.primary.main, 0.3),
+    },
+}));
+
+export const CategoryChip = styled(Chip)<{ category: string }>(({ category }) => {
+    const config = categoryConfig[category as keyof typeof categoryConfig];
+    return {
+        backgroundColor: alpha(config.color, 0.1),
+        color: config.color,
+        fontWeight: 600,
+        '& .MuiChip-icon': {
+            color: config.color,
+        },
+    };
+});
+
+export const MarginIndicator = styled(Box)<{ margin: number }>(({ theme, margin }) => {
+    const getColor = () => {
+        if (margin < 10) return theme.palette.error.main;
+        if (margin < 20) return theme.palette.warning.main;
+        return theme.palette.success.main;
+    };
+
+    return {
+        display: 'flex',
+        alignItems: 'center',
+        padding: theme.spacing(0.5, 1),
+        borderRadius: theme.spacing(1),
+        backgroundColor: alpha(getColor(), 0.1),
+        color: getColor(),
+        fontWeight: 600,
+        fontSize: '0.875rem',
+    };
+});

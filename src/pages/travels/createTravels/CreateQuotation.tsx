@@ -11,6 +11,7 @@ import ServicesComponents from "./ui/Step2/Services";
 import SummaryPriceBreakdown from "./ui/Step3/SummaryPriceBreakdown";
 import ReviewAndSend from "./ui/Step4/ReviewAndSend";
 import { useStep1 } from "./logic/useStep1";
+import useStep2 from "./logic/useStep2";
 
 
 const CreateQuotation = () => {
@@ -18,7 +19,11 @@ const CreateQuotation = () => {
     const theme = useTheme();
     const stepValidation = useStepValidation();
     const { steps, activeStep, handleNext, handleBack } = useStepper(stepValidation);
-    const { onSubmit: onSubmitStep1, handleClientSelect, watchedValues, errors, control } = useStep1();
+    //Step 1
+    const { onSubmit: onSubmitStep1, handleClientSelect, watchedValues, errors, control: Step1Control } = useStep1();
+
+    //Step 2
+    const { templateModalOpen, supplierModalOpen, handleModalOpen, addFromSupplier, watchedServices, control: Step2Control, addService, addFromTemplate, fields, remove, calculateServiceTotals, setValue, errors: Step2Errors } = useStep2();
 
     const renderStepContent = () => {
         switch (activeStep) {
@@ -35,12 +40,27 @@ const CreateQuotation = () => {
                     onSubmit={onSubmitStep1}
                     handleClientSelect={handleClientSelect}
                     watchedValues={watchedValues}
-                    control={control}
+                    control={Step1Control}
                     errors={errors}
                 />
 
             case 2:
-                return <ServicesComponents />;
+                return <ServicesComponents
+                    theme={theme}
+                    supplierModalOpen={supplierModalOpen}
+                    templateModalOpen={templateModalOpen}
+                    setOpenModalType={handleModalOpen}
+                    addFromSupplier={addFromSupplier}
+                    control={Step2Control}
+                    watchedServices={watchedServices}
+                    addService={addService}
+                    addFromTemplate={addFromTemplate}
+                    fields={fields}
+                    remove={remove}
+                    calculateServiceTotals={calculateServiceTotals}
+                    setValue={setValue}
+                    errors={Step2Errors}
+                />;
 
             case 3:
                 return <SummaryPriceBreakdown />;

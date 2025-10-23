@@ -24,8 +24,10 @@ export interface QuotationStepData {
     };
     step2: {
         services: ServiceItem[];
-        //usesDayByDay: boolean;
-        //days: DayPlan[];
+        totalNetCost: number;
+        totalMarkup: number;
+        totalGrossPrice: number;
+        averageMargin: number;
     };
     step3: {
         pricing: PricingBreakdown;

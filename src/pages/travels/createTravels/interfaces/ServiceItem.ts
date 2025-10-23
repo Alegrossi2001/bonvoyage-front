@@ -6,6 +6,7 @@ export interface ServiceItem {
     category: ActivityType;
     name: string;
     description: string;
+    unit: string;
     supplier?: Supplier;
     unitPrice: number;
     quantity: number;
@@ -14,4 +15,12 @@ export interface ServiceItem {
     finalPrice: number;
     isIncluded: boolean;
     notes?: string;
+}
+
+export interface ServiceTemplate {
+    id: string;
+    name: string;
+    icon: string;
+    description: string;
+    services: ServiceItem[];
 }
