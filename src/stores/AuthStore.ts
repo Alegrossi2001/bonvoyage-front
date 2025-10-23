@@ -186,7 +186,7 @@ export const useAuthStore = create<AuthStore>()(
 
                     const roles = Array.isArray(role) ? role : [role];
                     return roles.includes(user.role);
-                }
+                },
             })),
             {
                 name: 'bonvoyage-demo-auth',

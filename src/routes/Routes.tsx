@@ -13,6 +13,9 @@ import type { Role } from '../interfaces/Auth/Auth';
 import CreateQuotation from '../pages/travels/createTravels/CreateQuotation';
 import MyQuotations from '../pages/travels/myTravels/MyQuotations';
 import ConfirmedQuotations from '../pages/travels/confirmedTravels/ConfirmedQuotations';
+import TourOperatorInbox from '../pages/inbox/TourOperatorInbox';
+import OperatorDashboard from '../pages/dashboards/operator/OperatorDashboard';
+import UserDashboard from '../pages/dashboards/user/UserDashboard';
 
 export interface NavigationalRoutes {
     type: "collapse" | "title" | "divider" | "hidden";
@@ -37,11 +40,22 @@ export const NavigationalRoutes: NavigationalRoutes[] = [
     {
         type: "collapse",
         name: "Dashboard",
-        key: "dashboard",
+        key: "dashboard-operator",
         icon: <DashboardIcon />,
-        route: "/dashboard",
-        component: <div>Dashboard Page</div>,
-        badge: "LIVE"
+        route: "/dashboard-operator",
+        component: <OperatorDashboard />,
+        badge: "OPERATOR",
+        permissions: ["operator", "admin"]
+    },
+    {
+        type: "collapse",
+        name: "Dashboard",
+        key: "dashboard-user",
+        icon: <DashboardIcon />,
+        route: "/dashboard-user",
+        component: <UserDashboard />,
+        badge: "USER",
+        permissions: ["user", "admin"]
     },
     {
         type: "collapse",
@@ -102,7 +116,7 @@ export const NavigationalRoutes: NavigationalRoutes[] = [
         key: "inbox",
         icon: <Email />,
         route: "/inbox",
-        component: <div>Inbox</div>
+        component: <TourOperatorInbox />
     }
 
 ];

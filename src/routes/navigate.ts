@@ -19,7 +19,6 @@ const useBonVoyageNavigate = () => {
     const location = useLocation();
 
     const { isAuthenticated, hasPermission, hasRole } = useAuthStore();
-
     const routeNavigate = useCallback((to: string, options: NavigationOptions = {}) => {
         const {
             requireAuth = false,
@@ -51,8 +50,10 @@ const useBonVoyageNavigate = () => {
         return true;
     }, [navigate, location, isAuthenticated, hasPermission, hasRole]);
 
+    const isOperator = hasRole('operator');
+
     const quickNav = {
-        dashboard: () => routeNavigate('/dashboard'),
+        dashboard: () => routeNavigate(`dashboard-${isOperator ? 'operator' : 'user'}`),
         login: () => navigate('/auth/signin'),
         confirmedTravels: () => routeNavigate('/bookings/confirmed'),
         back: () => navigate(-1),
