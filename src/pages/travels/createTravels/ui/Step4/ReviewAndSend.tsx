@@ -10,7 +10,6 @@ import {
     IconButton,
     Alert,
     Divider,
-    Paper,
     TextField,
     FormControl,
     InputLabel,
@@ -23,18 +22,8 @@ import {
     DialogContent,
     DialogActions,
     alpha,
-    useTheme,
     Grid,
 } from '@mui/material';
-import {
-    Timeline,
-    TimelineItem,
-    TimelineSeparator,
-    TimelineConnector,
-    TimelineContent,
-    TimelineDot,
-    TimelineOppositeContent,
-} from '@mui/lab';
 import {
     SendOutlined,
     EditOutlined,
@@ -42,21 +31,11 @@ import {
     VisibilityOutlined,
     EmailOutlined,
     AttachFileOutlined,
-    HistoryOutlined,
-    ExpandMoreOutlined,
-    CheckCircleOutlined,
-    CalendarTodayOutlined,
     ContentCopyOutlined,
     DownloadOutlined,
-    InfoOutlined,
-    AttachMoneyOutlined,
-    GroupOutlined,
     PrintOutlined,
     AutorenewOutlined,
     EventAvailableOutlined,
-    ExpandLessOutlined,
-    Drafts,
-    Send,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
@@ -165,27 +144,6 @@ const mockQuoteData = {
     reminderDate: dayjs().add(5, 'day'),
 };
 
-const ActivityLogCard = styled(Card)(({ theme }) => ({
-    border: '1px solid #e0e0e0',
-    borderRadius: '12px',
-    padding: '25px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-    '& .MuiTimelineItem-root': {
-        '&::before': {
-            display: 'none',
-        },
-    },
-    '& .MuiTimelineContent-root': {
-        paddingLeft: theme.spacing(1),
-        paddingRight: 0,
-    },
-    '& .MuiTimelineDot-root': {
-        boxShadow: 'none',
-        margin: 0,
-        padding: theme.spacing(1.5),
-    },
-}));
-
 const VersionChip = styled(Chip)(({ theme }) => ({
     backgroundColor: alpha(theme.palette.primary.main, 0.1),
     color: theme.palette.primary.main,
@@ -232,7 +190,6 @@ This quote is valid until {{validUntil}}. We would be happy to discuss any adjus
 };
 
 const ReviewAndSend: React.FC = () => {
-    const theme = useTheme();
     const [quoteVersion, setQuoteVersion] = useState(mockQuoteData.version);
     const [quoteStatus, setQuoteStatus] = useState(mockQuoteData.status);
     const [emailDialogOpen, setEmailDialogOpen] = useState(false);
@@ -241,7 +198,6 @@ const ReviewAndSend: React.FC = () => {
     const [followUpDays, setFollowUpDays] = useState(5);
     const [followUpDate, setFollowUpDate] = useState<Dayjs | null>(mockQuoteData.reminderDate);
     const [editMode, setEditMode] = useState<string | null>(null);
-    const [activityLogExpanded, setActivityLogExpanded] = useState(false);
 
     // Real-time countdown calculations
     const timeCalculations = useMemo(() => {
@@ -310,48 +266,6 @@ const ReviewAndSend: React.FC = () => {
 
         console.log('New version created:', newVersion);
     }, [generateNextVersion]);
-
-    const getActivityIcon = (type: string) => {
-        switch (type) {
-            case 'created':
-                return <Drafts />;
-            case 'modified':
-                return <EditOutlined />;
-            case 'priced':
-                return <AttachMoneyOutlined />;
-            case 'sent':
-                return <Send />;
-            case 'versioned':
-                return <AutorenewOutlined />;
-            case 'viewed':
-                return <VisibilityOutlined />;
-            case 'approved':
-                return <CheckCircleOutlined />;
-            case 'reviewed':
-                return <CheckCircleOutlined />;
-            default:
-                return <InfoOutlined />;
-        }
-    };
-
-    const getActivityColor = (type: string) => {
-        switch (type) {
-            case 'created':
-                return 'primary';
-            case 'modified':
-                return 'warning';
-            case 'priced':
-                return 'success';
-            case 'sent':
-                return 'info';
-            case 'approved':
-                return 'success';
-            case 'reviewed':
-                return 'success';
-            default:
-                return 'grey';
-        }
-    };
 
     const renderEditableSection = (section: string, title: string, content: React.ReactNode) => (
         <Card sx={{ mb: 2 }}>
@@ -575,119 +489,6 @@ const ReviewAndSend: React.FC = () => {
                                 </CardContent>
                             </CountdownCard>
 
-                            {/* Quote Overview */}
-                            {renderEditableSection(
-                                'overview',
-                                'Quote Overview',
-                                <Grid container spacing={3}>
-                                    <Grid>
-                                        <Stack spacing={2}>
-                                            <Box>
-                                                <Typography variant="subtitle2" color="text.secondary">
-                                                    Client
-                                                </Typography>
-                                                <Typography variant="body1" fontWeight={600}>
-                                                    {mockQuoteData.client.name}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    {mockQuoteData.client.contactPerson}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    {mockQuoteData.client.email}
-                                                </Typography>
-                                            </Box>
-
-                                            <Box>
-                                                <Typography variant="subtitle2" color="text.secondary">
-                                                    Trip Details
-                                                </Typography>
-                                                <Typography variant="body1" fontWeight={600}>
-                                                    {mockQuoteData.trip.title}
-                                                </Typography>
-                                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                                                    <Chip
-                                                        icon={<CalendarTodayOutlined />}
-                                                        label={`${dayjs(mockQuoteData.trip.dateFrom).format('MMM DD')} - ${dayjs(mockQuoteData.trip.dateTo).format('MMM DD, YYYY')}`}
-                                                        size="small"
-                                                        variant="outlined"
-                                                    />
-                                                    <Chip
-                                                        icon={<GroupOutlined />}
-                                                        label={`${mockQuoteData.trip.travelers} travelers`}
-                                                        size="small"
-                                                        variant="outlined"
-                                                    />
-                                                </Stack>
-                                            </Box>
-                                        </Stack>
-                                    </Grid>
-
-                                    <Grid>
-                                        <Box>
-                                            <Typography variant="subtitle2" color="text.secondary">
-                                                Pricing Summary
-                                            </Typography>
-                                            <Paper sx={{ p: 2, mt: 1, backgroundColor: alpha(theme.palette.primary.main, 0.05) }}>
-                                                <Stack spacing={1}>
-                                                    <Stack direction="row" justifyContent="space-between">
-                                                        <Typography variant="body2">
-                                                            Total Quote Value
-                                                        </Typography>
-                                                        <Typography variant="h6" fontWeight={700} color="primary.main">
-                                                            €{mockQuoteData.pricing.total.toLocaleString()}
-                                                        </Typography>
-                                                    </Stack>
-                                                    <Stack direction="row" justifyContent="space-between">
-                                                        <Typography variant="body2">
-                                                            Price per Person
-                                                        </Typography>
-                                                        <Typography variant="body1" fontWeight={600}>
-                                                            €{mockQuoteData.pricing.pricePerPerson.toLocaleString()}
-                                                        </Typography>
-                                                    </Stack>
-                                                    <Stack direction="row" justifyContent="space-between">
-                                                        <Typography variant="body2">
-                                                            Margin
-                                                        </Typography>
-                                                        <Chip
-                                                            label={`${mockQuoteData.pricing.margin}%`}
-                                                            size="small"
-                                                            color={mockQuoteData.pricing.margin >= 20 ? 'success' : mockQuoteData.pricing.margin >= 15 ? 'warning' : 'error'}
-                                                        />
-                                                    </Stack>
-                                                </Stack>
-                                            </Paper>
-                                        </Box>
-                                    </Grid>
-                                </Grid>
-                            )}
-
-                            {/* Services Summary */}
-                            {renderEditableSection(
-                                'services',
-                                'Services Included',
-                                <Stack spacing={2}>
-                                    {mockQuoteData.services.map((service) => (
-                                        <Stack key={service.id} direction="row" justifyContent="space-between" alignItems="center">
-                                            <Box>
-                                                <Typography variant="body2" fontWeight={600}>
-                                                    {service.description}
-                                                </Typography>
-                                                <Chip
-                                                    label={service.category}
-                                                    size="small"
-                                                    variant="outlined"
-                                                    sx={{ mt: 0.5, textTransform: 'capitalize' }}
-                                                />
-                                            </Box>
-                                            <Typography variant="body1" fontWeight={600}>
-                                                €{service.finalPrice.toLocaleString()}
-                                            </Typography>
-                                        </Stack>
-                                    ))}
-                                </Stack>
-                            )}
-
                             {/* Terms & Conditions */}
                             {renderEditableSection(
                                 'terms',
@@ -879,65 +680,6 @@ const ReviewAndSend: React.FC = () => {
                                     </Stack>
                                 </CardContent>
                             </Card>
-
-                            {/* Activity Log with Timeline */}
-                            <ActivityLogCard>
-                                <CardContent>
-                                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-                                        <Typography variant="h6" fontWeight={600}>
-                                            <HistoryOutlined sx={{ mr: 1, verticalAlign: 'middle' }} />
-                                            Activity Timeline
-                                        </Typography>
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => setActivityLogExpanded(!activityLogExpanded)}
-                                        >
-                                            {activityLogExpanded ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
-                                        </IconButton>
-                                    </Stack>
-
-                                    <Timeline position="left">
-                                        {mockQuoteData.activityLog
-                                            .slice(0, activityLogExpanded ? undefined : 3)
-                                            .map((activity) => (
-                                                <TimelineItem key={activity.id}>
-                                                    <TimelineOppositeContent sx={{ flex: 0.3 }}>
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            {dayjs(activity.timestamp).format('HH:mm')}
-                                                        </Typography>
-                                                        <Typography variant="caption" color="text.secondary" display="block">
-                                                            {dayjs(activity.timestamp).fromNow()}
-                                                        </Typography>
-                                                    </TimelineOppositeContent>
-                                                    <TimelineSeparator>
-                                                        <TimelineDot color={getActivityColor(activity.type) as "inherit" | "grey" | "primary" | "secondary" | "error" | "info" | "success" | "warning"}>
-                                                            {getActivityIcon(activity.type)}
-                                                        </TimelineDot>
-                                                        <TimelineConnector />
-                                                    </TimelineSeparator>
-                                                    <TimelineContent>
-                                                        <Typography variant="body2" fontWeight={600}>
-                                                            {activity.details}
-                                                        </Typography>
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            by {activity.user}
-                                                        </Typography>
-                                                    </TimelineContent>
-                                                </TimelineItem>
-                                            ))}
-                                    </Timeline>
-
-                                    {mockQuoteData.activityLog.length > 3 && (
-                                        <Button
-                                            size="small"
-                                            onClick={() => setActivityLogExpanded(!activityLogExpanded)}
-                                            sx={{ mt: 1 }}
-                                        >
-                                            {activityLogExpanded ? 'Show Less' : `Show All (${mockQuoteData.activityLog.length})`}
-                                        </Button>
-                                    )}
-                                </CardContent>
-                            </ActivityLogCard>
 
                             {/* Quote Metadata */}
                             <Card>
