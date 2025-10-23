@@ -30,7 +30,7 @@ const CustomerDropdown: React.FC<CustomerDropdownProps> = ({
                     {...field}
                     options={filteredClients}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
-                    renderOption={(props, option) => renderClientOption(option)}
+                    renderOption={(_, option) => renderClientOption(option)}
                     freeSolo
                     filterOptions={(options, { inputValue }) =>
                         options.filter(option =>
