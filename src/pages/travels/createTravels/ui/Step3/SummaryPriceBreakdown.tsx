@@ -12,17 +12,8 @@ import {
     Paper,
     TextField,
     InputAdornment,
-    Slider,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
     alpha,
     useTheme,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
     Table,
     TableBody,
     TableCell,
@@ -37,19 +28,14 @@ import {
     TrendingDownOutlined,
     PersonOutlined,
     GroupOutlined,
-    EditOutlined,
     SaveOutlined,
-    SendOutlined,
     VisibilityOutlined,
-    InfoOutlined,
     CalendarTodayOutlined,
-    AutoGraphOutlined,
+    InfoOutline,
     ThumbUpOutlined,
     ThumbDownOutlined,
-    ExpandMoreOutlined,
-    ExpandLessOutlined,
 } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
+import { MarginBadge, PriceCard } from '../Primitives';
 import dayjs from 'dayjs';
 
 // Mock data - this would come from previous steps
@@ -144,82 +130,10 @@ interface WhatIfScenario {
     marginImpact: number;
 }
 
-const StatusChip = styled(Chip)<{ status: string }>(({ theme, status }) => {
-    const getStatusConfig = () => {
-        switch (status) {
-            case 'draft':
-                return { color: theme.palette.warning.main, bg: alpha(theme.palette.warning.main, 0.1) };
-            case 'sent':
-                return { color: theme.palette.info.main, bg: alpha(theme.palette.info.main, 0.1) };
-            case 'approved':
-                return { color: theme.palette.success.main, bg: alpha(theme.palette.success.main, 0.1) };
-            case 'rejected':
-                return { color: theme.palette.error.main, bg: alpha(theme.palette.error.main, 0.1) };
-            default:
-                return { color: theme.palette.grey[600], bg: alpha(theme.palette.grey[600], 0.1) };
-        }
-    };
-
-    const config = getStatusConfig();
-    return {
-        backgroundColor: config.bg,
-        color: config.color,
-        fontWeight: 600,
-        textTransform: 'uppercase',
-        fontSize: '0.75rem',
-    };
-});
-
-const MarginBadge = styled(Box)<{ margin: number; target?: number }>(({ theme, margin, target = 20 }) => {
-    const getMarginStatus = () => {
-        if (margin >= target) return { color: theme.palette.success.main, icon: '🎯', label: 'Excellent' };
-        if (margin >= target * 0.75) return { color: theme.palette.warning.main, icon: '⚠️', label: 'Acceptable' };
-        return { color: theme.palette.error.main, icon: '🔻', label: 'Low' };
-    };
-
-    const status = getMarginStatus();
-
-    return {
-        display: 'inline-flex',
-        alignItems: 'center',
-        padding: theme.spacing(0.5, 1.5),
-        borderRadius: theme.spacing(3),
-        backgroundColor: alpha(status.color, 0.1),
-        border: `2px solid ${alpha(status.color, 0.3)}`,
-        color: status.color,
-        fontWeight: 700,
-        fontSize: '0.875rem',
-        gap: theme.spacing(0.5),
-
-        '&::before': {
-            content: `"${status.icon}"`,
-            fontSize: '1rem',
-        },
-
-        '&::after': {
-            content: `"${status.label}"`,
-            marginLeft: theme.spacing(0.5),
-            fontSize: '0.75rem',
-            opacity: 0.8,
-        },
-    };
-});
-
-const PriceCard = styled(Card)(({ theme }) => ({
-    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-    color: 'white',
-    '& .MuiTypography-root': {
-        color: 'inherit',
-    },
-}));
-
 const SummaryPriceBreakdown: React.FC = () => {
     const theme = useTheme();
-    const [whatIfOpen, setWhatIfOpen] = useState(false);
     const [whatIfTravelers, setWhatIfTravelers] = useState(mockQuoteData.trip.travelers);
     const [whatIfDuration, setWhatIfDuration] = useState(mockQuoteData.trip.duration);
-    const [quoteStatus, setQuoteStatus] = useState(mockQuoteData.status);
-    const [showDetailedBreakdown, setShowDetailedBreakdown] = useState(false);
 
     // Calculate totals
     const totals = useMemo(() => {
@@ -287,22 +201,10 @@ const SummaryPriceBreakdown: React.FC = () => {
         };
     }, [whatIfTravelers, whatIfDuration, totals.totalPrice]);
 
-    const handleStatusChange = useCallback((newStatus: string) => {
-        setQuoteStatus(newStatus);
-        // Here you would typically save to API
-        console.log('Status changed to:', newStatus);
-    }, []);
-
     const handleSaveQuote = useCallback(() => {
         console.log('Saving quote...');
         // API call to save quote
     }, []);
-
-    const handleSendQuote = useCallback(() => {
-        console.log('Sending quote...');
-        // API call to send quote
-        handleStatusChange('sent');
-    }, [handleStatusChange]);
 
     const getCategoryIcon = (category: string) => {
         const icons = {
@@ -325,7 +227,7 @@ const SummaryPriceBreakdown: React.FC = () => {
             };
         } else if (totals.marginPercentage >= 15) {
             return {
-                icon: <InfoOutlined color="warning" />,
+                icon: <InfoOutline color="warning" />,
                 message: 'Good margin. Consider if there\'s room for optimization.',
                 color: 'warning.main'
             };
@@ -341,7 +243,7 @@ const SummaryPriceBreakdown: React.FC = () => {
     const recommendation = getMarginRecommendation();
 
     return (
-        <Box sx={{ maxWidth: 1200, mx: 'auto', p: 4 }}>
+        <Box sx={{ mx: 'auto', p: 4 }}>
             {/* Header */}
             <Box sx={{ mb: 4 }}>
                 <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={2}>
@@ -353,29 +255,6 @@ const SummaryPriceBreakdown: React.FC = () => {
                             Review your quote details and pricing before sending to client
                         </Typography>
                     </Box>
-
-                    <Stack direction="row" spacing={2}>
-                        <StatusChip
-                            status={quoteStatus}
-                            label={quoteStatus}
-                            onDelete={quoteStatus === 'draft' ? () => { } : undefined}
-                            deleteIcon={<EditOutlined />}
-                        />
-
-                        <FormControl size="small" sx={{ minWidth: 120 }}>
-                            <InputLabel>Status</InputLabel>
-                            <Select
-                                value={quoteStatus}
-                                label="Status"
-                                onChange={(e) => handleStatusChange(e.target.value)}
-                            >
-                                <MenuItem value="draft">Draft</MenuItem>
-                                <MenuItem value="sent">Sent</MenuItem>
-                                <MenuItem value="approved">Approved</MenuItem>
-                                <MenuItem value="rejected">Rejected</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Stack>
                 </Stack>
             </Box>
 
@@ -439,13 +318,6 @@ const SummaryPriceBreakdown: React.FC = () => {
                                     <Typography variant="h6" fontWeight={600}>
                                         Services Breakdown
                                     </Typography>
-                                    <Button
-                                        size="small"
-                                        onClick={() => setShowDetailedBreakdown(!showDetailedBreakdown)}
-                                        endIcon={showDetailedBreakdown ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
-                                    >
-                                        {showDetailedBreakdown ? 'Hide' : 'Show'} Details
-                                    </Button>
                                 </Stack>
 
                                 <TableContainer>
@@ -454,13 +326,9 @@ const SummaryPriceBreakdown: React.FC = () => {
                                             <TableRow>
                                                 <TableCell>Service</TableCell>
                                                 <TableCell align="center">Qty</TableCell>
-                                                {showDetailedBreakdown && (
-                                                    <>
-                                                        <TableCell align="right">Unit Cost</TableCell>
-                                                        <TableCell align="right">Net Cost</TableCell>
-                                                        <TableCell align="center">Markup</TableCell>
-                                                    </>
-                                                )}
+                                                <TableCell align="right">Unit Cost</TableCell>
+                                                <TableCell align="right">Net Cost</TableCell>
+                                                <TableCell align="center">Markup</TableCell>
                                                 <TableCell align="right">Total</TableCell>
                                             </TableRow>
                                         </TableHead>
@@ -485,24 +353,20 @@ const SummaryPriceBreakdown: React.FC = () => {
                                                     <TableCell align="center">
                                                         {service.quantity} {service.unit}
                                                     </TableCell>
-                                                    {showDetailedBreakdown && (
-                                                        <>
-                                                            <TableCell align="right">
-                                                                €{service.unitCost}
-                                                            </TableCell>
-                                                            <TableCell align="right">
-                                                                €{service.totalCost.toLocaleString()}
-                                                            </TableCell>
-                                                            <TableCell align="center">
-                                                                <Chip
-                                                                    label={`${service.markup}%`}
-                                                                    size="small"
-                                                                    variant="outlined"
-                                                                    color={service.markup >= 20 ? 'success' : service.markup >= 10 ? 'warning' : 'error'}
-                                                                />
-                                                            </TableCell>
-                                                        </>
-                                                    )}
+                                                    <TableCell align="right">
+                                                        €{service.unitCost}
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        €{service.totalCost.toLocaleString()}
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Chip
+                                                            label={`${service.markup}%`}
+                                                            size="small"
+                                                            variant="outlined"
+                                                            color={service.markup >= 20 ? 'success' : service.markup >= 10 ? 'warning' : 'error'}
+                                                        />
+                                                    </TableCell>
                                                     <TableCell align="right">
                                                         <Typography variant="body2" fontWeight={600}>
                                                             €{service.finalPrice.toLocaleString()}
@@ -523,13 +387,6 @@ const SummaryPriceBreakdown: React.FC = () => {
                                     <Typography variant="h6" fontWeight={600}>
                                         What-If Analysis
                                     </Typography>
-                                    <Button
-                                        variant="outlined"
-                                        startIcon={<AutoGraphOutlined />}
-                                        onClick={() => setWhatIfOpen(true)}
-                                    >
-                                        Open Calculator
-                                    </Button>
                                 </Stack>
 
                                 <Alert severity="info" sx={{ mb: 2 }}>
@@ -751,17 +608,6 @@ const SummaryPriceBreakdown: React.FC = () => {
                                 <Stack spacing={2}>
                                     <Button
                                         fullWidth
-                                        variant="contained"
-                                        size="large"
-                                        startIcon={<SendOutlined />}
-                                        onClick={handleSendQuote}
-                                        disabled={quoteStatus !== 'draft'}
-                                    >
-                                        Send Quote to Client
-                                    </Button>
-
-                                    <Button
-                                        fullWidth
                                         variant="outlined"
                                         startIcon={<SaveOutlined />}
                                         onClick={handleSaveQuote}
@@ -783,106 +629,6 @@ const SummaryPriceBreakdown: React.FC = () => {
                     </Stack>
                 </Grid>
             </Grid>
-
-            {/* What-If Dialog */}
-            <Dialog open={whatIfOpen} onClose={() => setWhatIfOpen(false)} maxWidth="md" fullWidth>
-                <DialogTitle>
-                    <AutoGraphOutlined sx={{ mr: 1, verticalAlign: 'middle' }} />
-                    What-If Price Calculator
-                </DialogTitle>
-                <DialogContent>
-                    <Grid container spacing={3}>
-                        <Grid>
-                            <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                                Adjust Parameters
-                            </Typography>
-
-                            <Stack spacing={3}>
-                                <Box>
-                                    <Typography variant="body2" gutterBottom>
-                                        Number of Travelers: {whatIfTravelers}
-                                    </Typography>
-                                    <Slider
-                                        value={whatIfTravelers}
-                                        onChange={(_, value) => setWhatIfTravelers(value as number)}
-                                        min={5}
-                                        max={100}
-                                        step={5}
-                                        marks
-                                        valueLabelDisplay="auto"
-                                    />
-                                </Box>
-
-                                <Box>
-                                    <Typography variant="body2" gutterBottom>
-                                        Trip Duration: {whatIfDuration} days
-                                    </Typography>
-                                    <Slider
-                                        value={whatIfDuration}
-                                        onChange={(_, value) => setWhatIfDuration(value as number)}
-                                        min={2}
-                                        max={14}
-                                        step={1}
-                                        marks
-                                        valueLabelDisplay="auto"
-                                    />
-                                </Box>
-                            </Stack>
-                        </Grid>
-
-                        <Grid>
-                            <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                                Price Impact
-                            </Typography>
-
-                            <Stack spacing={2}>
-                                <Paper sx={{ p: 2 }}>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Original Price per Person
-                                    </Typography>
-                                    <Typography variant="h6" fontWeight={600}>
-                                        €{totals.pricePerPerson.toLocaleString()}
-                                    </Typography>
-                                </Paper>
-
-                                <Paper sx={{ p: 2, backgroundColor: alpha(theme.palette.primary.main, 0.05) }}>
-                                    <Typography variant="caption" color="text.secondary">
-                                        New Price per Person
-                                    </Typography>
-                                    <Typography variant="h5" fontWeight={700} color="primary.main">
-                                        €{whatIfScenario.pricePerPerson.toLocaleString()}
-                                    </Typography>
-                                </Paper>
-
-                                <Paper sx={{ p: 2 }}>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Total Quote Value
-                                    </Typography>
-                                    <Typography variant="h6" fontWeight={600}>
-                                        €{whatIfScenario.adjustedTotal.toLocaleString()}
-                                    </Typography>
-                                    <Typography variant="caption" color={whatIfScenario.marginImpact > 0 ? 'success.main' : 'error.main'}>
-                                        {whatIfScenario.marginImpact > 0 ? '+' : ''}{whatIfScenario.marginImpact.toFixed(1)}% vs original
-                                    </Typography>
-                                </Paper>
-                            </Stack>
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setWhatIfOpen(false)}>Close</Button>
-                    <Button
-                        variant="contained"
-                        onClick={() => {
-                            // Apply what-if scenario
-                            console.log('Apply scenario:', whatIfScenario);
-                            setWhatIfOpen(false);
-                        }}
-                    >
-                        Apply Changes
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </Box>
     );
 };

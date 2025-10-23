@@ -168,3 +168,46 @@ export const MarginIndicator = styled(Box)<{ margin: number }>(({ theme, margin 
         fontSize: '0.875rem',
     };
 });
+
+export const MarginBadge = styled(Box)<{ margin: number; target?: number }>(({ theme, margin, target = 20 }) => {
+    const getMarginStatus = () => {
+        if (margin >= target) return { color: theme.palette.success.main, icon: '🎯', label: 'Excellent' };
+        if (margin >= target * 0.75) return { color: theme.palette.warning.main, icon: '⚠️', label: 'Acceptable' };
+        return { color: theme.palette.error.main, icon: '🔻', label: 'Low' };
+    };
+
+    const status = getMarginStatus();
+
+    return {
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: theme.spacing(0.5, 1.5),
+        borderRadius: theme.spacing(3),
+        backgroundColor: alpha(status.color, 0.1),
+        border: `2px solid ${alpha(status.color, 0.3)}`,
+        color: status.color,
+        fontWeight: 700,
+        fontSize: '0.875rem',
+        gap: theme.spacing(0.5),
+
+        '&::before': {
+            content: `"${status.icon}"`,
+            fontSize: '1rem',
+        },
+
+        '&::after': {
+            content: `"${status.label}"`,
+            marginLeft: theme.spacing(0.5),
+            fontSize: '0.75rem',
+            opacity: 0.8,
+        },
+    };
+});
+
+export const PriceCard = styled(Card)(({ theme }) => ({
+    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+    color: 'white',
+    '& .MuiTypography-root': {
+        color: 'inherit',
+    },
+}));
