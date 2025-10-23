@@ -63,7 +63,8 @@ const CreateQuotation = () => {
                 />;
 
             case 3:
-                return <SummaryPriceBreakdown />;
+                return <SummaryPriceBreakdown
+                    theme={theme} />;
 
             case 4:
                 return <ReviewAndSend />
