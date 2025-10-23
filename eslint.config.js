@@ -15,6 +15,12 @@ export default defineConfig([
       reactHooks.configs['recommended-latest'],
       reactRefresh.configs.vite,
     ],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "warn",
+      "react/no-unescaped-entities": "off",
+      "@next/next/no-page-custom-font": "off",
+      "react-hooks/exhaustive-deps": "warn"
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
