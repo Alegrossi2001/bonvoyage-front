@@ -118,8 +118,11 @@ const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
     timeRange = 'week'
 }) => {
     const getTrendIcon = (trend: string) => {
-        return trend === 'positive' ? <TrendingUpOutlined fontSize="small" /> :
-            trend === 'negative' ? <TrendingDownOutlined fontSize="small" /> : null;
+        return trend === 'positive'
+            ? <TrendingUpOutlined fontSize="small" />
+            : trend === 'negative'
+                ? <TrendingDownOutlined fontSize="small" />
+                : undefined; // <-- use undefined, not null
     };
 
     const getTrendClass = (trend: string) => {
