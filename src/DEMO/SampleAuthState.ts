@@ -1,3 +1,4 @@
+import type { User } from "../interfaces/Auth/Auth";
 import type { AuthState } from "../interfaces/Auth/AuthState";
 
 export const managerAuthState: AuthState = {
@@ -47,32 +48,33 @@ export const managerAuthState: AuthState = {
     isInitialised: true,
 };
 
+export const mockUser: User = {
+    id: 'operator-1',
+    firstName: 'Travel',
+    lastName: 'Operator',
+    name: 'Travel Operator',
+    sessionId: 'session-67890',
+    organisationId: 'org-1',
+    email: 'operator@bonvoyage.com',
+    permissions: ['read', 'write'],
+    role: "operator",
+    status: 'online',
+    emailVerified: true,
+    createdAt: new Date('2023-06-20T14:30:00Z'),
+    updatedAt: new Date('2024-10-18T16:45:00Z'),
+    preferences: {
+        language: 'en',
+        timezone: 'America/New_York',
+        notifications: {
+            email: true,
+            sms: true,
+            push: true
+        }
+    }
+};
 
 export const operatorAuthState: AuthState = {
-    user: {
-        id: 'operator-1',
-        firstName: 'Travel',
-        lastName: 'Operator',
-        name: 'Travel Operator',
-        sessionId: 'session-67890',
-        organisationId: 'org-1',
-        email: 'operator@bonvoyage.com',
-        permissions: ['read', 'write'],
-        role: "operator",
-        status: 'online',
-        emailVerified: true,
-        createdAt: new Date('2023-06-20T14:30:00Z'),
-        updatedAt: new Date('2024-10-18T16:45:00Z'),
-        preferences: {
-            language: 'en',
-            timezone: 'America/New_York',
-            notifications: {
-                email: true,
-                sms: true,
-                push: true
-            }
-        }
-    },
+    user: mockUser,
     organization: {
         id: 'org-1',
         name: 'Bon Voyage',
@@ -93,6 +95,8 @@ export const operatorAuthState: AuthState = {
     sessionExpiresAt: new Date(Date.now() + 3600 * 1000), // 1 hour
     isInitialised: true,
 };
+
+
 
 export const adminAuthState: AuthState = {
     user: {

@@ -16,6 +16,7 @@ import ConfirmedQuotations from '../pages/travels/confirmedTravels/ConfirmedQuot
 import TourOperatorInbox from '../pages/inbox/TourOperatorInbox';
 import OperatorDashboard from '../pages/dashboards/operator/OperatorDashboard';
 import UserDashboard from '../pages/dashboards/user/UserDashboard';
+import AssignRequests from '../pages/assign/AssignRequests';
 
 export interface NavigationalRoutes {
     type: "collapse" | "title" | "divider" | "hidden";
@@ -59,12 +60,11 @@ export const NavigationalRoutes: NavigationalRoutes[] = [
     },
     {
         type: "collapse",
-        name: "Analytics",
-        key: "analytics",
+        name: "Assegna richieste",
+        key: "assign",
         icon: <TrendingUp />,
-        route: "/analytics",
-        component: <div>Analytics Page</div>,
-        premium: true,
+        route: "/assign",
+        component: <AssignRequests />,
         permissions: ["admin", "user"]
     },
     {
