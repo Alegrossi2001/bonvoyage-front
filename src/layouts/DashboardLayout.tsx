@@ -21,7 +21,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     user,
     logout
 }) => (
-    <Box sx={{ display: 'flex' }}>
+    <Box
+        sx={{
+            display: 'flex',
+            height: '100vh',
+            width: '100%',
+            maxWidth: '100vw',
+            overflowX: 'hidden',
+            overflowY: 'hidden',
+        }}
+    >
         <CssBaseline />
 
         <NavigationSidebar
@@ -35,14 +44,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <Box
             component="main"
             sx={{
-                flexGrow: 1,
-                minHeight: '100vh',
+                flex: '1 1 0',
+                height: '100vh',
+                minHeight: 0,
+                overflowY: 'auto',
+                overflowX: 'hidden',
                 backgroundColor: 'background.default',
                 transition: 'margin 0.3s ease',
                 padding: 3,
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                maxWidth: '100vw',
             }}
         >
-
             {children}
         </Box>
     </Box>
