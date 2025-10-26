@@ -16,6 +16,7 @@ export const managerAuthState: AuthState = {
         emailVerified: true,
         createdAt: new Date('2023-01-15T10:00:00Z'),
         updatedAt: new Date('2024-01-10T12:00:00Z'),
+        isOnboarded: true,
         preferences: {
             language: 'en',
             timezone: 'UTC',
@@ -54,6 +55,7 @@ export const mockUser: User = {
     lastName: 'Operator',
     name: 'Travel Operator',
     sessionId: 'session-67890',
+    isOnboarded: true,
     organisationId: 'org-1',
     email: 'operator@bonvoyage.com',
     permissions: ['read', 'write'],
@@ -70,7 +72,7 @@ export const mockUser: User = {
             sms: true,
             push: true
         }
-    }
+    },
 };
 
 export const operatorAuthState: AuthState = {
@@ -118,6 +120,7 @@ export const adminAuthState: AuthState = {
         emailVerified: true,
         createdAt: new Date('2022-01-01T00:00:00Z'),
         updatedAt: new Date('2024-10-19T07:00:00Z'),
+        isOnboarded: true,
         preferences: {
             language: 'en',
             timezone: 'UTC',
@@ -127,6 +130,7 @@ export const adminAuthState: AuthState = {
                 push: true
             }
         }
+
     },
     organization: {
         id: 'org-1',

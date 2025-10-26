@@ -1,13 +1,25 @@
+export const INBOX_ITEM_TYPES = [
+    'quote_request',
+    'supplier_update',
+    'client_message',
+    'task_alert',
+    'system_notification',
+    'trip_update',
+    'any'
+]
+
+export const ENTITY_TYPES = ['quote', 'trip', 'client', 'supplier']
+
 export interface InboxItem {
     id: string;
-    type: 'quote_request' | 'supplier_update' | 'client_message' | 'task_alert' | 'system_notification' | 'trip_update';
+    type: typeof INBOX_ITEM_TYPES[number];
     title: string;
     preview: string;
     isRead: boolean;
     priority: 'low' | 'normal' | 'high' | 'urgent';
     createdAt: string;
     entityId?: string;
-    entityType?: 'quote' | 'trip' | 'client' | 'supplier';
+    entityType?: typeof ENTITY_TYPES[number];
     sender: {
         name: string;
         avatar?: string;

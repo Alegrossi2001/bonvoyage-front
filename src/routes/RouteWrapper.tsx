@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { NavigationalRoutes } from './Routes';
 import type { NavigationalRoutes as NavigationalRoutesType } from './Routes';
 import type { Role } from '../interfaces/Auth/Auth';
 import { useAuthStore } from '../stores/AuthStore';
 import AuthRoutes from './AuthRoutes';
+import useBonVoyageNavigate from './navigate';
 
 
 interface RouteWrapperProps {
@@ -28,7 +29,7 @@ const filterRoutes = (routes: NavigationalRoutesType[], userRole: Role): Navigat
 
 const RouteWrapper: React.FC<RouteWrapperProps> = ({ userRole = 'admin' }) => {
     const location = useLocation();
-    const navigate = useNavigate();
+    const { routeNavigate } = useBonVoyageNavigate();
 
     const availableRoutes = filterRoutes(NavigationalRoutes, userRole);
 
@@ -38,7 +39,7 @@ const RouteWrapper: React.FC<RouteWrapperProps> = ({ userRole = 'admin' }) => {
         isAuthenticated,
         initialize,
         isInitialised,
-        logout
+        logout,
     } = useAuthStore();
 
     useEffect(() => {
@@ -49,13 +50,13 @@ const RouteWrapper: React.FC<RouteWrapperProps> = ({ userRole = 'admin' }) => {
 
     useEffect(() => {
         if (isInitialised && !isAuthenticated) {
-            navigate(AuthRoutes.SIGN_IN);
+            routeNavigate(AuthRoutes.SIGN_IN);
         }
-    }, [isAuthenticated, isInitialised, navigate]);
+    }, [isAuthenticated, isInitialised, routeNavigate]);
 
     const handleLogout = async () => {
         await logout();
-        navigate(AuthRoutes.SIGN_IN);
+        routeNavigate(AuthRoutes.SIGN_IN);
     }
 
     if (!isAuthenticated || !user) {
@@ -66,7 +67,7 @@ const RouteWrapper: React.FC<RouteWrapperProps> = ({ userRole = 'admin' }) => {
         <DashboardLayout
             routes={availableRoutes}
             activeRoute={location.pathname}
-            onNavigate={navigate}
+            onNavigate={routeNavigate}
             user={user}
             logout={handleLogout}
         >

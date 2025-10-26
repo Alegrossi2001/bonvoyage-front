@@ -11,7 +11,7 @@ import InboxItemViewer from "./ui/InboxItemViewer";
 const TourOperatorInbox = () => {
 
     const theme = useTheme();
-    const { searchTerm, setSearchTerm, filteredItems } = useSearch(mockInboxItems);
+    const { searchTerm, filteredItems, onSearchChange, filterType, onFilterTypeChange, entityType, onEntityTypeChange } = useSearch(mockInboxItems);
     const stats = useInboxStats(mockInboxItems);
     return (
         <Box sx={{ p: 3 }}>
@@ -22,12 +22,11 @@ const TourOperatorInbox = () => {
             />
             <InboxSearchBar
                 searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                filterType={'all'}
-                setFilterType={() => { }}
-                selectedCategory={'all'}
-                setSelectedCategory={() => { }}
-                stats={stats}
+                setSearchTerm={onSearchChange}
+                filterType={filterType}
+                setFilterType={onFilterTypeChange}
+                selectedEntityType={entityType}
+                setSelectedEntityType={onEntityTypeChange}
             />
             <Grid container>
                 <Grid size={5}>

@@ -333,19 +333,7 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
 
     const filterRoutesByPermissions = (routeItems: NavigationalRoutes[]): NavigationalRoutes[] => {
         return routeItems
-            .filter(item => {
-                // Always show titles and dividers
-                if (item.type === 'title' || item.type === 'divider') {
-                    return true;
-                }
-
-                // For collapse items, check permissions
-                if (item.type === 'collapse') {
-                    return hasAccess(item);
-                }
-
-                return true;
-            })
+            .filter(item => hasAccess(item))
             .map(item => ({
                 ...item,
                 subRoutes: item.subRoutes ? filterRoutesByPermissions(item.subRoutes) : undefined

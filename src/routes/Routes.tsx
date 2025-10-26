@@ -6,6 +6,8 @@ import {
     CheckBoxOutlined,
     Dashboard as DashboardIcon,
     Email,
+    Engineering,
+    People,
     TrendingUp,
 
 } from "@mui/icons-material";
@@ -15,8 +17,9 @@ import MyQuotations from '../pages/travels/myTravels/MyQuotations';
 import ConfirmedQuotations from '../pages/travels/confirmedTravels/ConfirmedQuotations';
 import TourOperatorInbox from '../pages/inbox/TourOperatorInbox';
 import OperatorDashboard from '../pages/dashboards/operator/OperatorDashboard';
-import UserDashboard from '../pages/dashboards/user/UserDashboard';
 import AssignRequests from '../pages/assign/AssignRequests';
+import CreateAutomation from '../pages/automations/create/CreateAutomation';
+import ManagerDashboard from '../pages/dashboards/user/UserDashboard';
 
 export interface NavigationalRoutes {
     type: "collapse" | "title" | "divider" | "hidden";
@@ -54,7 +57,7 @@ export const NavigationalRoutes: NavigationalRoutes[] = [
         key: "dashboard-user",
         icon: <DashboardIcon />,
         route: "/dashboard-user",
-        component: <UserDashboard />,
+        component: <ManagerDashboard />,
         badge: "USER",
         permissions: ["user", "admin"]
     },
@@ -117,6 +120,36 @@ export const NavigationalRoutes: NavigationalRoutes[] = [
         icon: <Email />,
         route: "/inbox",
         component: <TourOperatorInbox />
+    },
+    {
+        type: "divider",
+        name: "Divider 2",
+        key: "divider-2",
+        permissions: ["admin", "user"]
+    },
+    {
+        type: "title",
+        name: "Zona amministrativa",
+        key: "admin-section",
+        permissions: ["admin", "user"]
+    },
+    {
+        type: "collapse",
+        name: "Crea automazioni",
+        key: "create-automation",
+        icon: <Engineering />,
+        permissions: ["admin", "user"],
+        route: "/admin/create-automation",
+        component: <CreateAutomation />
+    },
+    {
+        type: "collapse",
+        name: "Gestisci utenti",
+        key: "manage-roles",
+        icon: <People />,
+        permissions: ["admin", "user"],
+        route: "/admin/manage-roles",
+        component: <div>Role Management Page</div>
     }
 
 ];

@@ -149,6 +149,20 @@ const router = createBrowserRouter([
         ),
     },
     {
+        path: '/onboarding',
+        element: <p>Onboarding Page</p>,
+        errorElement: (
+            <div style={{ padding: '2rem', textAlign: 'center' }}>
+                <h2>Onboarding Error</h2>
+                <p>Failed to load onboarding page.</p>
+                <button onClick={() => window.location.reload()}>
+
+                    Reload Page
+                </button>
+            </div>
+        ),
+    },
+    {
         path: '/',
         element: <RouteWrapper userRole="admin" />,
         errorElement: (

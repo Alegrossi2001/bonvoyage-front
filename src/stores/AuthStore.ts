@@ -23,6 +23,7 @@ interface AuthActions {
     // Permissions & roles
     hasPermission: (permission: Permission | Permission[]) => boolean;
     hasRole: (role: Role | Role[]) => boolean;
+    isOnboarded: () => boolean;
 }
 
 interface AuthStore extends AuthState, AuthActions { }
@@ -187,6 +188,11 @@ export const useAuthStore = create<AuthStore>()(
                     const roles = Array.isArray(role) ? role : [role];
                     return roles.includes(user.role);
                 },
+                isOnboarded: () => {
+                    const user = get().user;
+                    if (!user) return false;
+                    return user.isOnboarded;
+                }
             })),
             {
                 name: 'bonvoyage-demo-auth',

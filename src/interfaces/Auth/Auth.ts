@@ -40,6 +40,7 @@ export interface User extends AuthUser {
     sessionId: string;
     deviceId?: string;
     ipAddress?: string;
+    isOnboarded: boolean;
 }
 
 /**

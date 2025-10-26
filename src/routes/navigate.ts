@@ -14,11 +14,13 @@ interface NavigationOptions extends NavigateOptions {
     skipAuthCheck?: boolean;
 }
 
+const TEST_ONBOARDING_MODE = false;
+
 const useBonVoyageNavigate = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const { isAuthenticated, hasPermission, hasRole } = useAuthStore();
+    const { isAuthenticated, hasPermission, hasRole, isOnboarded } = useAuthStore();
     const routeNavigate = useCallback((to: string, options: NavigationOptions = {}) => {
         const {
             requireAuth = false,
@@ -44,7 +46,12 @@ const useBonVoyageNavigate = () => {
             navigate(fallbackRoute, { replace: true });
             return false;
         }
-
+        /*
+                if (!isOnboarded() || (TEST_ONBOARDING_MODE && to !== '/onboarding')) {
+                    navigate('/onboarding', { replace: true });
+                    return false;
+                }
+        */
         const finalPath = preserveQuery && location.search ? `${to}${location.search}` : to;
         navigate(finalPath, navigateOptions);
         return true;
