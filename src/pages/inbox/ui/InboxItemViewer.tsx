@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Card,
@@ -11,6 +11,11 @@ import {
     Tooltip,
     Button,
     alpha,
+    TextField,
+    Collapse,
+    CircularProgress,
+    Menu,
+    MenuItem,
 } from '@mui/material';
 import {
     ReplyOutlined,
@@ -27,19 +32,28 @@ import {
     NotificationsOutlined,
     AttachMoneyOutlined,
     CalendarTodayOutlined,
+    ForwardToInboxOutlined,
+    DeleteOutline,
+    MoreVert,
+    FileDownloadOutlined,
 } from '@mui/icons-material';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import type { InboxItem } from '../interfaces/InboxItem';
 import type { Theme } from '@mui/system';
+import ConfirmAlert from '../../../components/modal/ConfirmAlert';
 
 interface InboxItemViewerProps {
     item: InboxItem | null;
     theme: Theme;
     onClose: () => void;
-    onReply?: (item: InboxItem) => void;
+    onReply?: (item: InboxItem, message: string) => Promise<void> | void;
     onArchive?: (item: InboxItem) => void;
     onMarkRead?: (item: InboxItem) => void;
     onMarkUnread?: (item: InboxItem) => void;
+    onForward?: (item: InboxItem, email: string) => Promise<void> | void;
+    onDelete?: (item: InboxItem) => void;
+    onDownload?: (item: InboxItem) => void;
+    onStar?: (item: InboxItem, starred: boolean) => void;
 }
 
 const getTypeConfig = (type: InboxItem['type'], theme: Theme) => {
@@ -75,7 +89,7 @@ const getTypeConfig = (type: InboxItem['type'], theme: Theme) => {
             bgColor: alpha(theme.palette.success.main, 0.1)
         }
     };
-    return configs[type] || configs.system_notification;
+    return configs[type as keyof typeof configs] || configs.system_notification;
 };
 
 const InboxItemViewer: React.FC<InboxItemViewerProps> = ({
@@ -86,7 +100,18 @@ const InboxItemViewer: React.FC<InboxItemViewerProps> = ({
     onArchive,
     onMarkRead,
     onMarkUnread,
+    onForward,
+    onDelete,
+    onDownload,
 }) => {
+    const [replyOpen, setReplyOpen] = useState(false);
+    const [replyMessage, setReplyMessage] = useState('');
+    const [replyLoading, setReplyLoading] = useState(false);
+    const [forwardOpen, setForwardOpen] = useState(false);
+    const [forwardEmail, setForwardEmail] = useState('');
+    const [forwardLoading, setForwardLoading] = useState(false);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [openConfirmConvert, setOpenConfirmConvert] = useState(false);
     if (!item) {
         return (
             <Box sx={{ p: 6, textAlign: 'center', color: 'text.secondary' }}>
@@ -99,6 +124,32 @@ const InboxItemViewer: React.FC<InboxItemViewerProps> = ({
 
     const typeConfig = getTypeConfig(item.type, theme);
 
+    // Starred state (mock, should come from item)
+
+
+    const handleReply = async () => {
+        setReplyLoading(true);
+        await onReply?.(item, replyMessage);
+        setReplyLoading(false);
+        setReplyOpen(false);
+        setReplyMessage('');
+    };
+
+    const handleForward = async () => {
+        setForwardLoading(true);
+        await onForward?.(item, forwardEmail);
+        setForwardLoading(false);
+        setForwardOpen(false);
+        setForwardEmail('');
+    };
+
+    const convertToQuotation = () => {
+        if (item.type !== "quote_request") {
+            //Open the modal asking if the user is sure they want to convert it to a quotation.
+            setOpenConfirmConvert(true);
+        }
+    }
+
     return (
         <Card
             sx={{
@@ -109,6 +160,7 @@ const InboxItemViewer: React.FC<InboxItemViewerProps> = ({
                 display: 'flex',
                 flexDirection: 'column',
                 background: `linear-gradient(135deg, #fff, ${alpha(typeConfig.color, 0.04)})`,
+                position: 'relative',
             }}
         >
             {/* Header */}
@@ -192,11 +244,36 @@ const InboxItemViewer: React.FC<InboxItemViewerProps> = ({
                             <ArchiveOutlined />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Open in new tab">
-                        <IconButton>
-                            <OpenInNewOutlined />
+                    <Tooltip title="Download">
+                        <IconButton onClick={() => onDownload?.(item)}>
+                            <FileDownloadOutlined />
                         </IconButton>
                     </Tooltip>
+                    <Tooltip title="Delete">
+                        <IconButton onClick={() => onDelete?.(item)}>
+                            <DeleteOutline />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="More">
+                        <IconButton onClick={e => setAnchorEl(e.currentTarget)}>
+                            <MoreVert />
+                        </IconButton>
+                    </Tooltip>
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={() => setAnchorEl(null)}
+                    >
+                        <MenuItem onClick={() => { setForwardOpen(true); setAnchorEl(null); }}>
+                            <ForwardToInboxOutlined sx={{ mr: 1 }} /> Forward
+                        </MenuItem>
+                        <MenuItem onClick={() => { setReplyOpen(true); setAnchorEl(null); }}>
+                            <ReplyOutlined sx={{ mr: 1 }} /> Reply
+                        </MenuItem>
+                        <MenuItem onClick={() => { convertToQuotation(); setAnchorEl(null); }}>
+                            <RequestQuoteOutlined sx={{ mr: 1 }} /> Open to Quotation
+                        </MenuItem>
+                    </Menu>
                 </Stack>
             </Stack>
 
@@ -264,6 +341,26 @@ const InboxItemViewer: React.FC<InboxItemViewerProps> = ({
                 </Typography>
             </Box>
 
+            {/* Attachments (mock) */}
+            {item.attachments && item.attachments.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+                        Attachments
+                    </Typography>
+                    <Stack direction="row" spacing={2}>
+                        {item.attachments.map((att: any, idx: number) => (
+                            <Chip
+                                key={idx}
+                                icon={<FileDownloadOutlined />}
+                                label={att.name}
+                                onClick={() => onDownload?.(item)}
+                                sx={{ fontWeight: 600 }}
+                            />
+                        ))}
+                    </Stack>
+                </Box>
+            )}
+
             {/* Thread (if any) */}
             {item.thread && item.thread.length > 0 && (
                 <Box sx={{ mb: 2 }}>
@@ -314,7 +411,7 @@ const InboxItemViewer: React.FC<InboxItemViewerProps> = ({
                     variant="contained"
                     color="primary"
                     startIcon={<ReplyOutlined />}
-                    onClick={() => onReply?.(item)}
+                    onClick={() => setReplyOpen(true)}
                 >
                     Reply
                 </Button>
@@ -326,6 +423,99 @@ const InboxItemViewer: React.FC<InboxItemViewerProps> = ({
                     Close
                 </Button>
             </Stack>
+
+            {/* Reply Section */}
+            <Collapse in={replyOpen}>
+                <Box sx={{
+                    mt: 3,
+                    p: 3,
+                    bgcolor: alpha(theme.palette.primary.main, 0.04),
+                    borderRadius: 2,
+                    boxShadow: 1,
+                }}>
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>
+                        Reply to {item.sender.name}
+                    </Typography>
+                    <TextField
+                        multiline
+                        minRows={4}
+                        fullWidth
+                        placeholder="Type your reply..."
+                        value={replyMessage}
+                        onChange={e => setReplyMessage(e.target.value)}
+                        sx={{ mb: 2 }}
+                    />
+                    <Stack direction="row" spacing={2}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={replyLoading ? <CircularProgress size={18} /> : <ReplyOutlined />}
+                            onClick={handleReply}
+                            disabled={replyLoading || !replyMessage}
+                        >
+                            Send Reply
+                        </Button>
+                        <Button
+                            variant="text"
+                            color="secondary"
+                            onClick={() => setReplyOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                    </Stack>
+                </Box>
+            </Collapse>
+
+            {/* Forward Section */}
+            <Collapse in={forwardOpen}>
+                <Box sx={{
+                    mt: 3,
+                    p: 3,
+                    bgcolor: alpha(theme.palette.info.main, 0.04),
+                    borderRadius: 2,
+                    boxShadow: 1,
+                }}>
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>
+                        Forward to Email
+                    </Typography>
+                    <TextField
+                        fullWidth
+                        placeholder="Recipient email address"
+                        value={forwardEmail}
+                        onChange={e => setForwardEmail(e.target.value)}
+                        sx={{ mb: 2 }}
+                    />
+                    <Stack direction="row" spacing={2}>
+                        <Button
+                            variant="contained"
+                            color="info"
+                            startIcon={forwardLoading ? <CircularProgress size={18} /> : <ForwardToInboxOutlined />}
+                            onClick={handleForward}
+                            disabled={forwardLoading || !forwardEmail}
+                        >
+                            Forward
+                        </Button>
+                        <Button
+                            variant="text"
+                            color="secondary"
+                            onClick={() => setForwardOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                    </Stack>
+                </Box>
+            </Collapse>
+            <ConfirmAlert
+                open={openConfirmConvert}
+                title="Open Quote Generation"
+                description="This email has not been marked as a quote request. Are you sure you want to start it as a quotation?"
+                onConfirm={convertToQuotation}
+                onCancel={() => setOpenConfirmConvert(false)}
+                confirmText="Yes, I am sure!"
+                cancelText="Cancel"
+                color='warning'
+                iconType='warning'
+            />
         </Card>
     );
 };

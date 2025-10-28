@@ -154,12 +154,12 @@ const TOperatorInboxItem: React.FC<TOperatorInboxItemProps> = ({ item, theme, ha
                                 </Tooltip>
                             )}
 
-                            <IconButton
+                            {/*<IconButton
                                 size="small"
                                 onClick={(e) => handleMenuOpen(e, item.id)}
                             >
                                 <MoreVertOutlined fontSize="small" />
-                            </IconButton>
+                            </IconButton>*/}
                         </Stack>
                     </Stack>
                 </Box>

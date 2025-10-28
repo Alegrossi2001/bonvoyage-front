@@ -10,10 +10,11 @@ interface TOperatorInboxProps {
     expandedItems: string[];
     searchTerm?: string;
     filterType?: string;
+    handleItemAction: (item: InboxItem) => void;
 
 }
 
-const ToperatorInbox: React.FC<TOperatorInboxProps> = ({ theme, filteredItems, expandedItems, searchTerm, filterType }) => (
+const ToperatorInbox: React.FC<TOperatorInboxProps> = ({ theme, filteredItems, expandedItems, searchTerm, filterType, handleItemAction }) => (
     <Box>
         <Card>
             <Box sx={{ maxHeight: '70vh', overflow: 'auto' }}>
@@ -25,7 +26,7 @@ const ToperatorInbox: React.FC<TOperatorInboxProps> = ({ theme, filteredItems, e
                         isExpanded={expandedItems.includes(item.id)}
                         index={index}
                         filteredItems={filteredItems}
-                        handleItemAction={() => { }}
+                        handleItemAction={handleItemAction}
                         handleMarkAsRead={() => { }}
                         handleMarkAsUnread={() => { }}
                         toggleExpanded={() => { }}

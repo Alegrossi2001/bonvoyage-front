@@ -36,6 +36,7 @@ export interface InboxItem {
         dueDate?: string;
     };
     thread?: InboxMessage[];
+    attachments?: File[] | string[]
 }
 
 export interface InboxMessage {

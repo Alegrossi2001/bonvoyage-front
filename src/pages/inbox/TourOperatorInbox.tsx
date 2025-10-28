@@ -3,30 +3,29 @@ import useSearch from "./logic/useSearch";
 import InboxHeader from "./ui/InboxHeader";
 import useInboxStats from "./logic/useInboxStats";
 import { mockInboxItems } from "../../DEMO/SampleInbox";
-import InboxStatisticsBar from "./ui/StatisticsBar";
 import InboxSearchBar from "./ui/InboxSearchBar";
 import ToperatorInbox from "./ui/TOperatorInbox";
 import InboxItemViewer from "./ui/InboxItemViewer";
+import useInboxViewer from "./logic/useInboxViewer";
 
 const TourOperatorInbox = () => {
 
     const theme = useTheme();
-    const { searchTerm, filteredItems, onSearchChange, filterType, onFilterTypeChange, entityType, onEntityTypeChange } = useSearch(mockInboxItems);
+    const { searchTerm, filteredItems, onSearchChange, filterType, onFilterTypeChange, priorityFilter, setPriority } = useSearch(mockInboxItems);
     const stats = useInboxStats(mockInboxItems);
+    const { item, openItem } = useInboxViewer();
     return (
         <Box sx={{ p: 3 }}>
             <InboxHeader />
-            <InboxStatisticsBar
-                theme={theme}
-                stats={stats}
-            />
             <InboxSearchBar
                 searchTerm={searchTerm}
                 setSearchTerm={onSearchChange}
                 filterType={filterType}
                 setFilterType={onFilterTypeChange}
-                selectedEntityType={entityType}
-                setSelectedEntityType={onEntityTypeChange}
+                stats={stats}
+                theme={theme}
+                setPriorityFilter={setPriority}
+                priorityFilter={priorityFilter}
             />
             <Grid container>
                 <Grid size={5}>
@@ -36,11 +35,12 @@ const TourOperatorInbox = () => {
                         expandedItems={[]}
                         searchTerm={searchTerm}
                         filterType={'all'}
+                        handleItemAction={openItem}
                     />
                 </Grid>
                 <Grid size={7}>
                     <InboxItemViewer
-                        item={mockInboxItems[0]}
+                        item={item}
                         theme={theme}
                         onClose={() => { }}
                         onReply={() => { }}
