@@ -29,7 +29,6 @@ import {
     PersonOutlined,
     CalendarTodayOutlined,
     AttachMoneyOutlined,
-    ShowChartOutlined,
     TimelineOutlined,
     CheckCircleOutlined,
     WarningAmberOutlined,
@@ -43,108 +42,9 @@ import {
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import type { Theme } from '@mui/system';
-
-// Mock data - this would come from previous steps
-const mockQuoteData = {
-    quoteId: 'QT-2024-001',
-    version: '2.1',
-    client: {
-        name: 'Sacred Heart College',
-        contactPerson: 'Sister Mary Catherine',
-        email: 'admissions@sacredheart.edu',
-        tier: 'Premium',
-        logo: '/api/placeholder/40/40',
-    },
-    trip: {
-        title: 'Spring 2024 Educational Trip to Rome',
-        destinations: ['Rome', 'Vatican City', 'Florence'],
-        dateFrom: '2024-06-15',
-        dateTo: '2024-06-20',
-        duration: 5,
-        travelers: 30,
-        tripType: 'school_group',
-    },
-    services: [
-        {
-            id: '1',
-            category: 'accommodation',
-            description: 'Hotel Roma Palace - Twin rooms with breakfast',
-            quantity: 15,
-            unit: 'room-nights',
-            unitCost: 85,
-            totalCost: 6375,
-            markup: 20,
-            markupAmount: 1275,
-            finalPrice: 7650,
-            confidence: 95,
-            supplier: 'Roma Palace Hotels',
-        },
-        {
-            id: '2',
-            category: 'transport',
-            description: 'Premium coach transport + VIP transfers',
-            quantity: 5,
-            unit: 'days',
-            unitCost: 450,
-            totalCost: 2250,
-            markup: 15,
-            markupAmount: 337.5,
-            finalPrice: 2587.5,
-            confidence: 88,
-            supplier: 'Elite Transport Services',
-        },
-        {
-            id: '3',
-            category: 'guide',
-            description: 'Licensed expert guide for historical sites',
-            quantity: 3,
-            unit: 'full-days',
-            unitCost: 320,
-            totalCost: 960,
-            markup: 25,
-            markupAmount: 240,
-            finalPrice: 1200,
-            confidence: 92,
-            supplier: 'Roman Heritage Guides',
-        },
-        {
-            id: '4',
-            category: 'meal',
-            description: 'Authentic Italian dining experiences',
-            quantity: 30,
-            unit: 'persons',
-            unitCost: 18,
-            totalCost: 2160,
-            markup: 15,
-            markupAmount: 324,
-            finalPrice: 2484,
-            confidence: 87,
-            supplier: 'Bella Vista Restaurants',
-        },
-        {
-            id: '5',
-            category: 'activity',
-            description: 'Skip-the-line Vatican & Colosseum access',
-            quantity: 30,
-            unit: 'persons',
-            unitCost: 22,
-            totalCost: 660,
-            markup: 10,
-            markupAmount: 66,
-            finalPrice: 726,
-            confidence: 96,
-            supplier: 'Premium Rome Tours',
-        },
-    ],
-    status: 'draft',
-    createdAt: new Date(),
-    validUntil: '2024-05-15',
-    competitorAnalysis: {
-        averagePrice: 15800,
-        ourPosition: 'competitive',
-        savings: 1150,
-    }
-};
+import type { TripDetails } from '../../interfaces/QuotationStepData';
+import type { ServiceItem } from '../../interfaces/ServiceItem';
+import type { Customer } from '../../interfaces/Customer';
 
 interface WhatIfScenario {
     travelers: number;
@@ -153,24 +53,54 @@ interface WhatIfScenario {
     pricePerPerson: number;
     marginImpact: number;
 }
+interface CompetitorAnalysis {
+    savings: number;
+    averagePrice: number;
+}
 
 interface SummaryPriceBreakdownProps {
     theme: Theme;
+    tripDetails?: TripDetails;
+    customer?: Partial<Customer>;
+    services?: ServiceItem[];
+    competitorAnalysis?: CompetitorAnalysis;
+    validUntil?: string;
 }
 
-const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) => {
-    const [whatIfTravelers, setWhatIfTravelers] = useState(mockQuoteData.trip.travelers);
-    const [whatIfDuration, setWhatIfDuration] = useState(mockQuoteData.trip.duration);
-    const [hoveredService, setHoveredService] = useState<string | null>(null);
+const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({
+    theme,
+    tripDetails,
+    customer,
+    services = [],
+    competitorAnalysis,
+    validUntil,
+}) => {
+    // Defensive defaults
+    const duration =
+        tripDetails?.endDate && tripDetails?.startDate
+            ? dayjs(tripDetails.endDate).diff(dayjs(tripDetails.startDate), 'day') + 1
+            : 1;
+    const defaultTravelers = tripDetails?.participants ?? tripDetails?.groupSize ?? 1;
+    const [whatIfTravelers, setWhatIfTravelers] = useState(defaultTravelers);
+    const [whatIfDuration, setWhatIfDuration] = useState(duration);
 
     // Calculate totals with enhanced metrics
     const totals = useMemo(() => {
-        const subtotalCost = mockQuoteData.services.reduce((sum, service) => sum + service.totalCost, 0);
-        const totalMarkup = mockQuoteData.services.reduce((sum, service) => sum + service.markupAmount, 0);
+        if (!services || services.length === 0) {
+            return {
+                subtotalCost: 0,
+                totalMarkup: 0,
+                totalPrice: 0,
+                pricePerPerson: 0,
+                marginPercentage: 0,
+            };
+        }
+        const subtotalCost = services.reduce((sum, service) => sum + (service.totalPrice ?? 0), 0);
+        const totalMarkup = services.reduce((sum, service) => sum + (service.totalPrice ?? 0), 0);
         const totalPrice = subtotalCost + totalMarkup;
-        const pricePerPerson = totalPrice / mockQuoteData.trip.travelers;
+        const travelers = tripDetails?.participants ?? tripDetails?.groupSize ?? 1;
+        const pricePerPerson = travelers > 0 ? totalPrice / travelers : 0;
         const marginPercentage = subtotalCost > 0 ? (totalMarkup / subtotalCost) * 100 : 0;
-        const averageConfidence = mockQuoteData.services.reduce((sum, service) => sum + service.confidence, 0) / mockQuoteData.services.length;
 
         return {
             subtotalCost,
@@ -178,41 +108,69 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
             totalPrice,
             pricePerPerson,
             marginPercentage,
-            averageConfidence,
         };
-    }, []);
+    }, [tripDetails, services]);
 
     // Enhanced what-if scenario calculation
     const whatIfScenario = useMemo((): WhatIfScenario => {
-        const travelerRatio = whatIfTravelers / mockQuoteData.trip.travelers;
-        const durationRatio = whatIfDuration / mockQuoteData.trip.duration;
+        if (!services || services.length === 0) {
+            return {
+                travelers: whatIfTravelers,
+                duration: whatIfDuration,
+                adjustedTotal: 0,
+                pricePerPerson: 0,
+                marginImpact: 0,
+            };
+        }
+        const travelerRatio =
+            (whatIfTravelers / (tripDetails?.participants ?? tripDetails?.groupSize ?? 1)) || 1;
+        const durationRatio = whatIfDuration / duration || 1;
         let adjustedTotal = 0;
 
-        mockQuoteData.services.forEach(service => {
-            let adjustedServiceCost = service.finalPrice;
+        services.forEach(service => {
+            let adjustedServiceCost = service.finalPrice ?? 0;
 
             switch (service.category) {
                 case 'accommodation':
-                    adjustedServiceCost = (service.finalPrice / mockQuoteData.trip.duration) * whatIfDuration * Math.ceil(whatIfTravelers / 2) / Math.ceil(mockQuoteData.trip.travelers / 2);
+                    adjustedServiceCost =
+                        duration > 0
+                            ? ((service.finalPrice ?? 0) / duration) *
+                            whatIfDuration *
+                            Math.ceil(whatIfTravelers / 2) /
+                            Math.ceil((tripDetails?.participants ?? tripDetails?.groupSize ?? 1) / 2)
+                            : 0;
                     break;
                 case 'transport':
-                    adjustedServiceCost = (service.finalPrice / mockQuoteData.trip.duration) * whatIfDuration * Math.min(travelerRatio, 1.5);
+                    adjustedServiceCost =
+                        duration > 0
+                            ? ((service.finalPrice ?? 0) / duration) *
+                            whatIfDuration *
+                            Math.min(travelerRatio, 1.5)
+                            : 0;
                     break;
-                case 'guide':
-                    adjustedServiceCost = (service.finalPrice / mockQuoteData.trip.duration) * whatIfDuration;
+                case 'guides':
+                    adjustedServiceCost =
+                        duration > 0
+                            ? ((service.finalPrice ?? 0) / duration) * whatIfDuration
+                            : 0;
                     break;
-                case 'meal':
-                case 'activity':
-                    adjustedServiceCost = service.finalPrice * travelerRatio * durationRatio;
+                case 'meals':
+                case 'activities':
+                    adjustedServiceCost =
+                        (service.finalPrice ?? 0) * travelerRatio * durationRatio;
                     break;
                 default:
-                    adjustedServiceCost = service.finalPrice * Math.max(travelerRatio, durationRatio);
+                    adjustedServiceCost =
+                        (service.finalPrice ?? 0) * Math.max(travelerRatio, durationRatio);
             }
             adjustedTotal += adjustedServiceCost;
         });
 
-        const pricePerPerson = adjustedTotal / whatIfTravelers;
-        const marginImpact = ((adjustedTotal - totals.totalPrice) / totals.totalPrice) * 100;
+        const pricePerPerson = whatIfTravelers > 0 ? adjustedTotal / whatIfTravelers : 0;
+        const marginImpact =
+            totals.totalPrice > 0
+                ? ((adjustedTotal - totals.totalPrice) / totals.totalPrice) * 100
+                : 0;
 
         return {
             travelers: whatIfTravelers,
@@ -221,9 +179,9 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
             pricePerPerson,
             marginImpact,
         };
-    }, [whatIfTravelers, whatIfDuration, totals.totalPrice]);
+    }, [whatIfTravelers, whatIfDuration, totals.totalPrice, duration, services, tripDetails]);
 
-    const getCategoryIcon = (category: string) => {
+    const getCategoryIcon = (category: string | undefined) => {
         const iconMap = {
             accommodation: <BusinessCenterOutlined sx={{ color: '#FF6B35' }} />,
             transport: <AutoGraphOutlined sx={{ color: '#4ECDC4' }} />,
@@ -232,112 +190,177 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
             activity: <InsightsOutlined sx={{ color: '#FFEAA7' }} />,
             other: <InfoOutline sx={{ color: '#DDA0DD' }} />,
         };
-        return iconMap[category as keyof typeof iconMap] || iconMap.other;
-    };
-
-    const getConfidenceColor = (confidence: number) => {
-        if (confidence >= 90) return 'success';
-        if (confidence >= 80) return 'warning';
-        return 'error';
+        return category && iconMap[category as keyof typeof iconMap]
+            ? iconMap[category as keyof typeof iconMap]
+            : iconMap.other;
     };
 
     const getMarginHealthStatus = () => {
-        if (totals.marginPercentage >= 25) return { status: 'excellent', color: '#4CAF50', icon: <CheckCircleOutlined /> };
-        if (totals.marginPercentage >= 15) return { status: 'good', color: '#FF9800', icon: <WarningAmberOutlined /> };
+        if (totals.marginPercentage >= 25)
+            return { status: 'excellent', color: '#4CAF50', icon: <CheckCircleOutlined /> };
+        if (totals.marginPercentage >= 15)
+            return { status: 'good', color: '#FF9800', icon: <WarningAmberOutlined /> };
         return { status: 'low', color: '#F44336', icon: <ErrorOutlineOutlined /> };
     };
 
     const marginHealth = getMarginHealthStatus();
 
+    // Defensive helpers
+    const safeDestinations = tripDetails?.destinations?.length
+        ? tripDetails.destinations.join(' → ')
+        : 'No destinations selected';
+
+    const safeCustomerName = customer?.name ?? 'Unknown Customer';
+    const safeCustomerEmail = customer?.email ?? 'Unknown Email';
+    const safeCustomerContact = customer?.phone ?? customer?.email ?? 'No Contact Info';
+
+    const safeStartDate = tripDetails?.startDate
+        ? dayjs(tripDetails.startDate).format('MMM DD')
+        : 'N/A';
+    const safeEndDate = tripDetails?.endDate
+        ? dayjs(tripDetails.endDate).format('MMM DD, YYYY')
+        : 'N/A';
+
+    const safeGroupSize = tripDetails?.groupSize ?? tripDetails?.participants ?? 1;
+
+    const safeValidUntil = validUntil ? dayjs(validUntil).format('MMM DD, YYYY') : 'N/A';
+    const safeDaysRemaining = validUntil ? dayjs(validUntil).diff(dayjs(), 'day') : 'N/A';
+
+    const safeCompetitorAvg =
+        competitorAnalysis?.averagePrice !== undefined
+            ? competitorAnalysis.averagePrice.toLocaleString()
+            : 'N/A';
+    const safeCompetitorSavings =
+        competitorAnalysis?.savings !== undefined
+            ? competitorAnalysis.savings.toLocaleString()
+            : 'N/A';
+
     return (
-        <Box sx={{
-            mx: 'auto',
-            p: 4,
-            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.02)} 0%, ${alpha(theme.palette.secondary.main, 0.02)} 100%)`,
-            minHeight: '100vh'
-        }}>
+        <Box
+            sx={{
+                mx: 'auto',
+                p: 4,
+                background: `linear-gradient(135deg, ${alpha(
+                    theme.palette.primary.main,
+                    0.02
+                )} 0%, ${alpha(theme.palette.secondary.main, 0.02)} 100%)`,
+                minHeight: '100vh',
+            }}
+        >
             {/* Main Layout Container */}
-            <Box sx={{
-                display: 'flex',
-                gap: 4,
-                flexDirection: { xs: 'column', lg: 'row' },
-            }}>
-                {/* Left Column - Details */}
-                <Box sx={{
-                    flex: 2,
+            <Box
+                sx={{
                     display: 'flex',
-                    flexDirection: 'column',
                     gap: 4,
-                }}>
+                    flexDirection: { xs: 'column', lg: 'row' },
+                }}
+            >
+                {/* Left Column - Details */}
+                <Box
+                    sx={{
+                        flex: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 4,
+                    }}
+                >
                     {/* Client & Trip Overview */}
                     <Slide direction="up" in timeout={600}>
-                        <Card sx={{
-                            background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)',
-                            border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                            boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-                        }}>
+                        <Card
+                            sx={{
+                                background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)',
+                                border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                                boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                            }}
+                        >
                             <CardContent sx={{ p: 4 }}>
-                                <Box sx={{
-                                    display: 'flex',
-                                    gap: 4,
-                                    flexDirection: { xs: 'column', md: 'row' },
-                                }}>
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        gap: 4,
+                                        flexDirection: { xs: 'column', md: 'row' },
+                                    }}
+                                >
                                     <Box sx={{ flex: 1 }}>
                                         <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-                                            <Avatar src={mockQuoteData.client.logo} sx={{ width: 48, height: 48 }}>
-                                                <BusinessCenterOutlined />
-                                            </Avatar>
+                                            <BusinessCenterOutlined />
+
                                             <Box>
                                                 <Typography variant="h6" fontWeight={700}>
-                                                    {mockQuoteData.client.name}
+                                                    {safeCustomerName}
                                                 </Typography>
                                                 <Typography variant="body2" color="text.secondary">
-                                                    {mockQuoteData.client.contactPerson}
+                                                    {safeCustomerContact}
                                                 </Typography>
                                             </Box>
                                         </Stack>
                                         <Stack spacing={2}>
                                             <Box>
-                                                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>
-                                                    Quote ID
-                                                </Typography>
-                                                <Typography variant="body1" fontWeight={600}>
-                                                    {mockQuoteData.quoteId}
+                                                <Typography
+                                                    variant="caption"
+                                                    color="text.secondary"
+                                                    sx={{ textTransform: 'uppercase', letterSpacing: 1 }}
+                                                >
+                                                    Quotazione
                                                 </Typography>
                                             </Box>
                                             <Box>
-                                                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>
+                                                <Typography
+                                                    variant="caption"
+                                                    color="text.secondary"
+                                                    sx={{ textTransform: 'uppercase', letterSpacing: 1 }}
+                                                >
                                                     Client Email
                                                 </Typography>
                                                 <Typography variant="body1" fontWeight={600}>
-                                                    {mockQuoteData.client.email}
+                                                    {safeCustomerEmail}
                                                 </Typography>
                                             </Box>
                                         </Stack>
                                     </Box>
                                     <Box sx={{ flex: 1 }}>
                                         <Stack spacing={2}>
-                                            <Box sx={{
-                                                p: 2,
-                                                borderRadius: 2,
-                                                background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.primary.main, 0.1)} 100%)`,
-                                            }}>
-                                                <Typography variant="caption" color="primary" sx={{ textTransform: 'uppercase', letterSpacing: 1, fontWeight: 600 }}>
+                                            <Box
+                                                sx={{
+                                                    p: 2,
+                                                    borderRadius: 2,
+                                                    background: `linear-gradient(135deg, ${alpha(
+                                                        theme.palette.primary.main,
+                                                        0.05
+                                                    )} 0%, ${alpha(
+                                                        theme.palette.primary.main,
+                                                        0.1
+                                                    )} 100%)`,
+                                                }}
+                                            >
+                                                <Typography
+                                                    variant="caption"
+                                                    color="primary"
+                                                    sx={{
+                                                        textTransform: 'uppercase',
+                                                        letterSpacing: 1,
+                                                        fontWeight: 600,
+                                                    }}
+                                                >
                                                     Travel Period
                                                 </Typography>
                                                 <Typography variant="h6" fontWeight={700}>
-                                                    {dayjs(mockQuoteData.trip.dateFrom).format('MMM DD')} - {dayjs(mockQuoteData.trip.dateTo).format('MMM DD, YYYY')}
+                                                    {safeStartDate} - {safeEndDate}
                                                 </Typography>
                                                 <Typography variant="body2" color="text.secondary">
-                                                    {mockQuoteData.trip.duration} days • {mockQuoteData.trip.travelers} travelers
+                                                    {duration} days • {safeGroupSize} travelers
                                                 </Typography>
                                             </Box>
                                             <Box>
-                                                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>
+                                                <Typography
+                                                    variant="caption"
+                                                    color="text.secondary"
+                                                    sx={{ textTransform: 'uppercase', letterSpacing: 1 }}
+                                                >
                                                     Destinations
                                                 </Typography>
                                                 <Typography variant="body1" fontWeight={600}>
-                                                    {mockQuoteData.trip.destinations.join(' → ')}
+                                                    {safeDestinations}
                                                 </Typography>
                                             </Box>
                                         </Stack>
@@ -349,31 +372,31 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
 
                     {/* Premium Services Table */}
                     <Zoom in timeout={800}>
-                        <Card sx={{
-                            boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-                            borderRadius: 3,
-                            overflow: 'hidden'
-                        }}>
-                            <Box sx={{
-                                p: 3,
-                                background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[100]} 100%)`,
-                                borderBottom: `1px solid ${theme.palette.divider}`
-                            }}>
+                        <Card
+                            sx={{
+                                boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                                borderRadius: 3,
+                                overflow: 'hidden',
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    p: 3,
+                                    background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[100]} 100%)`,
+                                    borderBottom: `1px solid ${theme.palette.divider}`,
+                                }}
+                            >
                                 <Stack direction="row" alignItems="center" justifyContent="space-between">
                                     <Box>
                                         <Typography variant="h5" fontWeight={700}>
                                             Service Breakdown
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary">
-                                            Detailed cost analysis with supplier confidence ratings
+                                            {services.length > 0
+                                                ? 'Detailed cost analysis with supplier confidence ratings'
+                                                : 'No services added yet.'}
                                         </Typography>
                                     </Box>
-                                    <Chip
-                                        label={`${totals.averageConfidence.toFixed(0)}% Avg Confidence`}
-                                        color="success"
-                                        variant="outlined"
-                                        icon={<ShowChartOutlined />}
-                                    />
                                 </Stack>
                             </Box>
 
@@ -381,116 +404,148 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
                                 <Table>
                                     <TableHead>
                                         <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
-                                            <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                            <TableCell
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    fontSize: '0.75rem',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: 1,
+                                                }}
+                                            >
                                                 Service & Supplier
                                             </TableCell>
-                                            <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                                            <TableCell
+                                                align="center"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    fontSize: '0.75rem',
+                                                    textTransform: 'uppercase',
+                                                }}
+                                            >
                                                 Quantity
                                             </TableCell>
-                                            <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                                            <TableCell
+                                                align="right"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    fontSize: '0.75rem',
+                                                    textTransform: 'uppercase',
+                                                }}
+                                            >
                                                 Unit Cost
                                             </TableCell>
-                                            <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                                            <TableCell
+                                                align="center"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    fontSize: '0.75rem',
+                                                    textTransform: 'uppercase',
+                                                }}
+                                            >
                                                 Margin
                                             </TableCell>
-                                            <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                                                Confidence
-                                            </TableCell>
-                                            <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                                            <TableCell
+                                                align="right"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    fontSize: '0.75rem',
+                                                    textTransform: 'uppercase',
+                                                }}
+                                            >
                                                 Total Price
                                             </TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {mockQuoteData.services.map((service, index) => (
-                                            <TableRow
-                                                key={service.id}
-                                                onMouseEnter={() => setHoveredService(service.id)}
-                                                onMouseLeave={() => setHoveredService(null)}
-                                                sx={{
-                                                    '&:hover': {
-                                                        backgroundColor: alpha(theme.palette.primary.main, 0.03),
-                                                        transform: 'scale(1.01)',
-                                                        transition: 'all 0.2s ease',
-                                                    },
-                                                    transition: 'all 0.2s ease',
-                                                    animationDelay: `${index * 100}ms`,
-                                                }}
-                                            >
-                                                <TableCell>
-                                                    <Stack direction="row" alignItems="center" spacing={2}>
-                                                        <Avatar sx={{
-                                                            width: 40,
-                                                            height: 40,
-                                                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
-                                                        }}>
-                                                            {getCategoryIcon(service.category)}
-                                                        </Avatar>
-                                                        <Box>
-                                                            <Typography variant="body1" fontWeight={600}>
-                                                                {service.description}
-                                                            </Typography>
-                                                            <Typography variant="caption" color="text.secondary">
-                                                                {service.supplier}
-                                                            </Typography>
-                                                        </Box>
-                                                    </Stack>
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                    <Box>
-                                                        <Typography variant="body1" fontWeight={600}>
-                                                            {service.quantity}
-                                                        </Typography>
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            {service.unit}
-                                                        </Typography>
-                                                    </Box>
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <Typography variant="body1" fontWeight={600}>
-                                                        €{service.unitCost}
+                                        {services.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={5} align="center">
+                                                    <Typography color="text.secondary">
+                                                        No services added yet.
                                                     </Typography>
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                    <Chip
-                                                        label={`${service.markup}%`}
-                                                        size="small"
-                                                        sx={{
-                                                            background: service.markup >= 20 ?
-                                                                'linear-gradient(45deg, #4CAF50, #45a049)' :
-                                                                service.markup >= 10 ?
-                                                                    'linear-gradient(45deg, #FF9800, #f57c00)' :
-                                                                    'linear-gradient(45deg, #F44336, #d32f2f)',
-                                                            color: 'white',
-                                                            fontWeight: 600,
-                                                        }}
-                                                    />
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                    <Stack alignItems="center" spacing={0.5}>
-                                                        <LinearProgress
-                                                            variant="determinate"
-                                                            value={service.confidence}
-                                                            color={getConfidenceColor(service.confidence)}
-                                                            sx={{ width: 60, height: 6, borderRadius: 3 }}
-                                                        />
-                                                        <Typography variant="caption" fontWeight={600}>
-                                                            {service.confidence}%
-                                                        </Typography>
-                                                    </Stack>
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <Typography variant="h6" fontWeight={700} color="primary.main">
-                                                        €{service.finalPrice.toLocaleString()}
-                                                    </Typography>
-                                                    {hoveredService === service.id && (
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            +€{service.markupAmount.toLocaleString()} margin
-                                                        </Typography>
-                                                    )}
                                                 </TableCell>
                                             </TableRow>
-                                        ))}
+                                        ) : (
+                                            services.map((service, index) => (
+                                                <TableRow
+                                                    key={service.id ?? index}
+                                                    sx={{
+                                                        '&:hover': {
+                                                            backgroundColor: alpha(
+                                                                theme.palette.primary.main,
+                                                                0.03
+                                                            ),
+                                                            transform: 'scale(1.01)',
+                                                            transition: 'all 0.2s ease',
+                                                        },
+                                                        transition: 'all 0.2s ease',
+                                                        animationDelay: `${index * 100}ms`,
+                                                    }}
+                                                >
+                                                    <TableCell>
+                                                        <Stack direction="row" alignItems="center" spacing={2}>
+                                                            <Avatar
+                                                                sx={{
+                                                                    width: 40,
+                                                                    height: 40,
+                                                                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                                                                }}
+                                                            >
+                                                                {getCategoryIcon(service.category)}
+                                                            </Avatar>
+                                                            <Box>
+                                                                <Typography variant="body1" fontWeight={600}>
+                                                                    {service?.description ?? 'No description'}
+                                                                </Typography>
+                                                                <Typography variant="caption" color="text.secondary">
+                                                                    {service.supplier?.name ?? 'Unknown Supplier'}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Stack>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Box>
+                                                            <Typography variant="body1" fontWeight={600}>
+                                                                {service.quantity ?? '-'}
+                                                            </Typography>
+                                                            <Typography variant="caption" color="text.secondary">
+                                                                {service.unit ?? ''}
+                                                            </Typography>
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        <Typography variant="body1" fontWeight={600}>
+                                                            €{service.unitPrice !== undefined ? service.unitPrice.toLocaleString() : '-'}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Chip
+                                                            label={
+                                                                service.markup !== undefined
+                                                                    ? `${service.markup}%`
+                                                                    : '-'
+                                                            }
+                                                            size="small"
+                                                            sx={{
+                                                                background:
+                                                                    service.markup !== undefined && service.markup >= 20
+                                                                        ? 'linear-gradient(45deg, #4CAF50, #45a049)'
+                                                                        : service.markup !== undefined && service.markup >= 10
+                                                                            ? 'linear-gradient(45deg, #FF9800, #f57c00)'
+                                                                            : 'linear-gradient(45deg, #F44336, #d32f2f)',
+                                                                color: 'white',
+                                                                fontWeight: 600,
+                                                            }}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        <Typography variant="h6" fontWeight={700} color="primary.main">
+                                                            €{service.finalPrice !== undefined ? service.finalPrice.toLocaleString() : '-'}
+                                                        </Typography>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
                                     </TableBody>
                                 </Table>
                             </TableContainer>
@@ -499,18 +554,25 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
 
                     {/* What-If Analysis */}
                     <Slide direction="left" in timeout={1000}>
-                        <Card sx={{
-                            background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.05)} 0%, ${alpha(theme.palette.info.main, 0.1)} 100%)`,
-                            border: `2px solid ${alpha(theme.palette.info.main, 0.2)}`,
-                            borderRadius: 3,
-                        }}>
+                        <Card
+                            sx={{
+                                background: `linear-gradient(135deg, ${alpha(
+                                    theme.palette.info.main,
+                                    0.05
+                                )} 0%, ${alpha(theme.palette.info.main, 0.1)} 100%)`,
+                                border: `2px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                                borderRadius: 3,
+                            }}
+                        >
                             <CardContent sx={{ p: 4 }}>
                                 <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-                                    <Avatar sx={{
-                                        backgroundColor: theme.palette.info.main,
-                                        width: 48,
-                                        height: 48
-                                    }}>
+                                    <Avatar
+                                        sx={{
+                                            backgroundColor: theme.palette.info.main,
+                                            width: 48,
+                                            height: 48,
+                                        }}
+                                    >
                                         <TimelineOutlined />
                                     </Avatar>
                                     <Box>
@@ -523,18 +585,24 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
                                     </Box>
                                 </Stack>
 
-                                <Box sx={{
-                                    display: 'flex',
-                                    gap: 3,
-                                    flexDirection: { xs: 'column', md: 'row' },
-                                }}>
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        gap: 3,
+                                        flexDirection: { xs: 'column', md: 'row' },
+                                    }}
+                                >
                                     <Box sx={{ flex: 1 }}>
                                         <TextField
                                             fullWidth
                                             type="number"
                                             label="Travelers"
                                             value={whatIfTravelers}
-                                            onChange={(e) => setWhatIfTravelers(parseInt(e.target.value) || 0)}
+                                            onChange={e =>
+                                                setWhatIfTravelers(
+                                                    Math.max(1, parseInt(e.target.value) || 1)
+                                                )
+                                            }
                                             InputProps={{
                                                 startAdornment: (
                                                     <InputAdornment position="start">
@@ -546,9 +614,12 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
                                                 '& .MuiOutlinedInput-root': {
                                                     backgroundColor: 'white',
                                                     '&:hover': {
-                                                        backgroundColor: alpha(theme.palette.info.main, 0.02),
-                                                    }
-                                                }
+                                                        backgroundColor: alpha(
+                                                            theme.palette.info.main,
+                                                            0.02
+                                                        ),
+                                                    },
+                                                },
                                             }}
                                         />
                                     </Box>
@@ -558,7 +629,11 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
                                             type="number"
                                             label="Duration (days)"
                                             value={whatIfDuration}
-                                            onChange={(e) => setWhatIfDuration(parseInt(e.target.value) || 0)}
+                                            onChange={e =>
+                                                setWhatIfDuration(
+                                                    Math.max(1, parseInt(e.target.value) || 1)
+                                                )
+                                            }
                                             InputProps={{
                                                 startAdornment: (
                                                     <InputAdornment position="start">
@@ -570,37 +645,78 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
                                                 '& .MuiOutlinedInput-root': {
                                                     backgroundColor: 'white',
                                                     '&:hover': {
-                                                        backgroundColor: alpha(theme.palette.info.main, 0.02),
-                                                    }
-                                                }
+                                                        backgroundColor: alpha(
+                                                            theme.palette.info.main,
+                                                            0.02
+                                                        ),
+                                                    },
+                                                },
                                             }}
                                         />
                                     </Box>
                                     <Box sx={{ flex: 1 }}>
-                                        <Paper sx={{
-                                            p: 3,
-                                            textAlign: 'center',
-                                            background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-                                            border: `2px solid ${alpha(theme.palette.success.main, 0.2)}`,
-                                            height: '100%',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            justifyContent: 'center'
-                                        }}>
-                                            <Typography variant="caption" color="success.main" sx={{ textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 }}>
+                                        <Paper
+                                            sx={{
+                                                p: 3,
+                                                textAlign: 'center',
+                                                background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                                                border: `2px solid ${alpha(
+                                                    theme.palette.success.main,
+                                                    0.2
+                                                )}`,
+                                                height: '100%',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'center',
+                                            }}
+                                        >
+                                            <Typography
+                                                variant="caption"
+                                                color="success.main"
+                                                sx={{
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: 1,
+                                                    fontWeight: 700,
+                                                }}
+                                            >
                                                 New Price per Person
                                             </Typography>
-                                            <Typography variant="h4" fontWeight={800} color="success.main" sx={{ my: 1 }}>
-                                                €{whatIfScenario.pricePerPerson.toLocaleString()}
+                                            <Typography
+                                                variant="h4"
+                                                fontWeight={800}
+                                                color="success.main"
+                                                sx={{ my: 1 }}
+                                            >
+                                                €
+                                                {whatIfScenario.pricePerPerson !== undefined
+                                                    ? whatIfScenario.pricePerPerson.toLocaleString()
+                                                    : '-'}
                                             </Typography>
-                                            <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
+                                            <Stack
+                                                direction="row"
+                                                alignItems="center"
+                                                justifyContent="center"
+                                                spacing={1}
+                                            >
                                                 {whatIfScenario.marginImpact > 0 ? (
                                                     <TrendingUpOutlined color="success" />
                                                 ) : (
                                                     <TrendingDownOutlined color="error" />
                                                 )}
-                                                <Typography variant="body1" fontWeight={600} color={whatIfScenario.marginImpact > 0 ? 'success.main' : 'error.main'}>
-                                                    {whatIfScenario.marginImpact > 0 ? '+' : ''}{whatIfScenario.marginImpact.toFixed(1)}%
+                                                <Typography
+                                                    variant="body1"
+                                                    fontWeight={600}
+                                                    color={
+                                                        whatIfScenario.marginImpact > 0
+                                                            ? 'success.main'
+                                                            : 'error.main'
+                                                    }
+                                                >
+                                                    {whatIfScenario.marginImpact > 0 ? '+' : ''}
+                                                    {whatIfScenario.marginImpact !== undefined
+                                                        ? whatIfScenario.marginImpact.toFixed(1)
+                                                        : '-'}
+                                                    %
                                                 </Typography>
                                             </Stack>
                                         </Paper>
@@ -612,41 +728,50 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
                 </Box>
 
                 {/* Right Column - Pricing & Actions */}
-                <Box sx={{
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 3,
-                }}>
+                <Box
+                    sx={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 3,
+                    }}
+                >
                     {/* Main Pricing Card */}
                     <Zoom in timeout={1200}>
-                        <Card sx={{
-                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                            color: 'white',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            '&::after': {
-                                content: '""',
-                                position: 'absolute',
-                                top: '-50%',
-                                right: '-50%',
-                                width: '200%',
-                                height: '200%',
-                                background: `conic-gradient(from 0deg, transparent, ${alpha('#fff', 0.1)}, transparent)`,
-                                animation: 'rotate 20s linear infinite',
-                            },
-                            '@keyframes rotate': {
-                                '0%': { transform: 'rotate(0deg)' },
-                                '100%': { transform: 'rotate(360deg)' },
-                            },
-                        }}>
+                        <Card
+                            sx={{
+                                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                                color: 'white',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                '&::after': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: '-50%',
+                                    right: '-50%',
+                                    width: '200%',
+                                    height: '200%',
+                                    background: `conic-gradient(from 0deg, transparent, ${alpha(
+                                        '#fff',
+                                        0.1
+                                    )}, transparent)`,
+                                    animation: 'rotate 20s linear infinite',
+                                },
+                                '@keyframes rotate': {
+                                    '0%': { transform: 'rotate(0deg)' },
+                                    '100%': { transform: 'rotate(360deg)' },
+                                },
+                            }}
+                        >
                             <CardContent sx={{ p: 4, position: 'relative', zIndex: 1 }}>
                                 <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-                                    <Avatar sx={{
-                                        backgroundColor: alpha('#fff', 0.2),
-                                        width: 56,
-                                        height: 56
-                                    }}>
+                                    <Avatar
+                                        sx={{
+                                            backgroundColor: alpha('#fff', 0.2),
+                                            width: 56,
+                                            height: 56,
+                                        }}
+                                    >
                                         <AttachMoneyOutlined sx={{ fontSize: 32 }} />
                                     </Avatar>
                                     <Box>
@@ -661,16 +786,28 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
 
                                 <Stack spacing={3}>
                                     <Box>
-                                        <Typography variant="h2" fontWeight={800} sx={{
-                                            background: 'linear-gradient(45deg, #fff 30%, rgba(255,255,255,0.7) 90%)',
-                                            backgroundClip: 'text',
-                                            WebkitBackgroundClip: 'text',
-                                            WebkitTextFillColor: 'transparent',
-                                        }}>
-                                            €{totals.totalPrice.toLocaleString()}
+                                        <Typography
+                                            variant="h2"
+                                            fontWeight={800}
+                                            sx={{
+                                                background:
+                                                    'linear-gradient(45deg, #fff 30%, rgba(255,255,255,0.7) 90%)',
+                                                backgroundClip: 'text',
+                                                WebkitBackgroundClip: 'text',
+                                                WebkitTextFillColor: 'transparent',
+                                            }}
+                                        >
+                                            €
+                                            {totals.totalPrice !== undefined
+                                                ? totals.totalPrice.toLocaleString()
+                                                : '-'}
                                         </Typography>
                                         <Typography variant="h6" sx={{ opacity: 0.9 }}>
-                                            €{totals.pricePerPerson.toLocaleString()} per person
+                                            €
+                                            {totals.pricePerPerson !== undefined
+                                                ? totals.pricePerPerson.toLocaleString()
+                                                : '-'}{' '}
+                                            per person
                                         </Typography>
                                     </Box>
 
@@ -682,7 +819,10 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
                                                 Base Cost
                                             </Typography>
                                             <Typography variant="body1" fontWeight={600}>
-                                                €{totals.subtotalCost.toLocaleString()}
+                                                €
+                                                {totals.subtotalCost !== undefined
+                                                    ? totals.subtotalCost.toLocaleString()
+                                                    : '-'}
                                             </Typography>
                                         </Stack>
                                         <Stack direction="row" justifyContent="space-between">
@@ -690,31 +830,36 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
                                                 Service Margin
                                             </Typography>
                                             <Typography variant="body1" fontWeight={600}>
-                                                €{totals.totalMarkup.toLocaleString()}
+                                                €
+                                                {totals.totalMarkup !== undefined
+                                                    ? totals.totalMarkup.toLocaleString()
+                                                    : '-'}
                                             </Typography>
                                         </Stack>
                                     </Stack>
 
                                     {/* Competitive Analysis */}
-                                    <Box sx={{
-                                        p: 2,
-                                        borderRadius: 2,
-                                        backgroundColor: alpha('#fff', 0.1),
-                                    }}>
+                                    <Box
+                                        sx={{
+                                            p: 2,
+                                            borderRadius: 2,
+                                            backgroundColor: alpha('#fff', 0.1),
+                                        }}
+                                    >
                                         <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
                                             Market Position
                                         </Typography>
                                         <Stack direction="row" alignItems="center" justifyContent="space-between">
                                             <Typography variant="caption">
-                                                Competitor Average: €{mockQuoteData.competitorAnalysis.averagePrice.toLocaleString()}
+                                                Competitor Average: €{safeCompetitorAvg}
                                             </Typography>
                                             <Chip
-                                                label={`€${mockQuoteData.competitorAnalysis.savings} saved`}
+                                                label={`€${safeCompetitorSavings} saved`}
                                                 size="small"
                                                 sx={{
                                                     backgroundColor: alpha('#4CAF50', 0.2),
                                                     color: '#4CAF50',
-                                                    fontWeight: 600
+                                                    fontWeight: 600,
                                                 }}
                                             />
                                         </Stack>
@@ -726,17 +871,24 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
 
                     {/* Margin Health Dashboard */}
                     <Fade in timeout={1400}>
-                        <Card sx={{
-                            border: `2px solid ${marginHealth.color}`,
-                            background: `linear-gradient(135deg, ${alpha(marginHealth.color, 0.05)} 0%, ${alpha(marginHealth.color, 0.1)} 100%)`
-                        }}>
+                        <Card
+                            sx={{
+                                border: `2px solid ${marginHealth.color}`,
+                                background: `linear-gradient(135deg, ${alpha(
+                                    marginHealth.color,
+                                    0.05
+                                )} 0%, ${alpha(marginHealth.color, 0.1)} 100%)`,
+                            }}
+                        >
                             <CardContent sx={{ p: 3 }}>
                                 <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-                                    <Avatar sx={{
-                                        backgroundColor: marginHealth.color,
-                                        width: 48,
-                                        height: 48
-                                    }}>
+                                    <Avatar
+                                        sx={{
+                                            backgroundColor: marginHealth.color,
+                                            width: 48,
+                                            height: 48,
+                                        }}
+                                    >
                                         {marginHealth.icon}
                                     </Avatar>
                                     <Box>
@@ -751,11 +903,18 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
 
                                 <Box sx={{ textAlign: 'center', mb: 3 }}>
                                     <Typography variant="h3" fontWeight={800} color={marginHealth.color}>
-                                        {totals.marginPercentage.toFixed(1)}%
+                                        {totals.marginPercentage !== undefined
+                                            ? totals.marginPercentage.toFixed(1)
+                                            : '-'}
+                                        %
                                     </Typography>
                                     <LinearProgress
                                         variant="determinate"
-                                        value={Math.min(totals.marginPercentage, 100)}
+                                        value={
+                                            totals.marginPercentage !== undefined
+                                                ? Math.min(totals.marginPercentage, 100)
+                                                : 0
+                                        }
                                         sx={{
                                             height: 8,
                                             borderRadius: 4,
@@ -764,7 +923,7 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
                                             '& .MuiLinearProgress-bar': {
                                                 backgroundColor: marginHealth.color,
                                                 borderRadius: 4,
-                                            }
+                                            },
                                         }}
                                     />
                                 </Box>
@@ -783,7 +942,10 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
                                             Profit Generated:
                                         </Typography>
                                         <Typography variant="caption" fontWeight={600} color="success.main">
-                                            €{totals.totalMarkup.toLocaleString()}
+                                            €
+                                            {totals.totalMarkup !== undefined
+                                                ? totals.totalMarkup.toLocaleString()
+                                                : '-'}
                                         </Typography>
                                     </Stack>
                                 </Stack>
@@ -804,19 +966,31 @@ const SummaryPriceBreakdown: React.FC<SummaryPriceBreakdownProps> = ({ theme }) 
                                             Valid Until:
                                         </Typography>
                                         <Typography variant="body1" fontWeight={600}>
-                                            {dayjs(mockQuoteData.validUntil).format('MMM DD, YYYY')}
+                                            {safeValidUntil}
                                         </Typography>
                                     </Stack>
-                                    <Box sx={{
-                                        p: 2,
-                                        borderRadius: 2,
-                                        background: `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.1)} 0%, ${alpha(theme.palette.warning.main, 0.2)} 100%)`,
-                                        textAlign: 'center'
-                                    }}>
+                                    <Box
+                                        sx={{
+                                            p: 2,
+                                            borderRadius: 2,
+                                            background: `linear-gradient(135deg, ${alpha(
+                                                theme.palette.warning.main,
+                                                0.1
+                                            )} 0%, ${alpha(
+                                                theme.palette.warning.main,
+                                                0.2
+                                            )} 100%)`,
+                                            textAlign: 'center',
+                                        }}
+                                    >
                                         <Typography variant="h4" fontWeight={700} color="warning.main">
-                                            {dayjs(mockQuoteData.validUntil).diff(dayjs(), 'day')}
+                                            {safeDaysRemaining}
                                         </Typography>
-                                        <Typography variant="caption" color="warning.main" sx={{ textTransform: 'uppercase', letterSpacing: 1 }}>
+                                        <Typography
+                                            variant="caption"
+                                            color="warning.main"
+                                            sx={{ textTransform: 'uppercase', letterSpacing: 1 }}
+                                        >
                                             Days Remaining
                                         </Typography>
                                     </Box>

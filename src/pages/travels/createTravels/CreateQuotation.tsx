@@ -25,6 +25,8 @@ const CreateQuotation = () => {
     //Step 2
     const { templateModalOpen, supplierModalOpen, handleModalOpen, addFromSupplier, watchedServices, control: Step2Control, addService, addFromTemplate, fields, remove, calculateServiceTotals, setValue, errors: Step2Errors } = useStep2();
 
+    //Step 3
+
     const renderStepContent = () => {
         switch (activeStep) {
             case 0:
@@ -64,7 +66,13 @@ const CreateQuotation = () => {
 
             case 3:
                 return <SummaryPriceBreakdown
-                    theme={theme} />;
+                    theme={theme}
+                    customer={watchedValues.step1?.customer}
+                    tripDetails={watchedValues.step1?.tripDetails}
+                    services={watchedServices}
+                    validUntil={watchedValues.step3?.validUntil}
+
+                />;
 
             case 4:
                 return <ReviewAndSend />

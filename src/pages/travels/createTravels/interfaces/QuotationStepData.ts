@@ -10,16 +10,7 @@ export interface QuotationStepData {
     };
     step1: {
         customer: Partial<Customer>;
-        tripDetails: {
-            tripName: string;
-            destinations: string[];
-            startDate: string;
-            endDate: string;
-            participants: number;
-            numberOfGroups?: number;
-            groupSize?: number;
-            tripType?: string;
-        };
+        tripDetails: TripDetails;
         requirements: RequirementItem[];
     };
     step2: {
@@ -43,4 +34,15 @@ export interface QuotationStepData {
             includeBreakdown: boolean;
         };
     };
+}
+
+export interface TripDetails {
+    tripName: string;
+    destinations: string[];
+    startDate: string;
+    endDate: string;
+    participants: number;
+    numberOfGroups?: number;
+    groupSize?: number;
+    tripType?: string;
 }

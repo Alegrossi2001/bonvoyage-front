@@ -27,6 +27,7 @@ interface ChooseTemplateProps {
     onNewTrip: () => void;
     onCloneQuote: (quote: PreviousQuotation) => void;
     loading?: boolean;
+
 }
 
 const ChooseTemplate: React.FC<ChooseTemplateProps> = ({
@@ -35,7 +36,7 @@ const ChooseTemplate: React.FC<ChooseTemplateProps> = ({
     loading = false,
 }) => {
     const theme = useTheme();
-    const [selectedOption, setSelectedOption] = useState<'new' | 'clone' | null>(null);
+    const [selectedOption, setSelectedOption] = useState<'new' | 'clone' | 'drafts' | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [dateFilter, setDateFilter] = useState<dayjs.Dayjs | null>(null);
     const [statusFilter, setStatusFilter] = useState<string>('');
@@ -69,7 +70,7 @@ const ChooseTemplate: React.FC<ChooseTemplateProps> = ({
         return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }, [searchTerm, dateFilter, statusFilter]);
 
-    const handleOptionSelect = useCallback((option: 'new' | 'clone') => {
+    const handleOptionSelect = useCallback((option: 'new' | 'clone' | 'drafts') => {
         setSelectedOption(option);
 
         if (option === 'new') {
@@ -120,7 +121,7 @@ const ChooseTemplate: React.FC<ChooseTemplateProps> = ({
                 </Box>
 
                 {/* Main Options - Side by Side */}
-                <Box sx={{ mb: 6 }}>
+                <Box sx={{ mb: 4 }}>
                     <Grid container spacing={4} justifyContent="center">
                         {/* New Trip Option */}
                         <QuoteStartCard
@@ -145,6 +146,18 @@ const ChooseTemplate: React.FC<ChooseTemplateProps> = ({
                                 'Leverage past quotes',
                                 'Maintain consistency',
                                 'Speed up the quoting process',
+                            ]}
+                        />
+                        {/* Continue Draft Option */}
+                        <QuoteStartCard
+                            selectedOption={selectedOption}
+                            type='drafts'
+                            handleOptionSelect={handleOptionSelect}
+                            theme={theme}
+                            tips={[
+                                'Pick up where you left off',
+                                'Edit and finalize your draft',
+                                'Easily convert to a new quote',
                             ]}
                         />
                     </Grid>
@@ -235,6 +248,9 @@ const ChooseTemplate: React.FC<ChooseTemplateProps> = ({
                         )}
                     </Box>
                 )}
+
+                {/** Continue Draft Option selection */}
+
             </Box>
         </LocalizationProvider>
     );

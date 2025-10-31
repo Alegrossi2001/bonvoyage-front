@@ -1,14 +1,15 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import type { Supplier } from "../interfaces/Supplier";
 import { useFieldArray, useForm } from "react-hook-form";
 import type { QuotationStepData } from "../interfaces/QuotationStepData";
 import type { ServiceItem } from "../interfaces/ServiceItem";
+import { useWatch } from "react-hook-form";
 
 const useStep2 = () => {
     const [templateModalOpen, setTemplateModalOpen] = useState(false);
     const [supplierModalOpen, setSupplierModalOpen] = useState(false);
 
-    const { control, watch, setValue, formState: { errors } } = useForm<Partial<QuotationStepData>>({
+    const { control, setValue, formState: { errors } } = useForm<Partial<QuotationStepData>>({
         defaultValues: {
             step2: {
                 services: [],
@@ -26,7 +27,7 @@ const useStep2 = () => {
         name: 'step2.services'
     });
 
-    const watchedServices = useMemo(() => watch('step2.services') || [], [watch]);
+    const watchedServices = useWatch({ control, name: 'step2.services' }) || [];
 
     const handleModalOpen = useCallback((type: 'templates' | 'suppliers') => {
         if (type === 'templates') {
@@ -80,17 +81,19 @@ const useStep2 = () => {
     const calculateServiceTotals = useCallback((index: number) => {
         const service = watchedServices[index];
         if (service) {
-            const totalCost = (service.quantity || 0) * (service.unitPrice || 0);
-            const markupAmount = totalCost * ((service.markup || 0) / 100);
-            const finalPrice = totalCost + markupAmount;
-            console.log('Calculated Totals:', { totalCost, markupAmount, finalPrice });
-            /*
-            setValue(`services.${index}.totalCost`, totalCost);
-            setValue(`services.${index}.markupAmount`, markupAmount);
-            setValue(`services.${index}.finalPrice`, finalPrice);
-            */
+            const quantity = Number(service.quantity) || 0;
+            const unitPrice = Number(service.unitPrice) || 0;
+            const markup = Number(service.markup) || 0;
+
+            const totalPrice = quantity * unitPrice;
+            const markupAmount = totalPrice * (markup / 100);
+            const finalPrice = totalPrice + markupAmount;
+
+            setValue(`step2.services.${index}.totalPrice`, totalPrice);
+            setValue(`step2.services.${index}.markup`, markupAmount);
+            setValue(`step2.services.${index}.finalPrice`, finalPrice);
         }
-    }, [watchedServices /*, setValue*/]);
+    }, [watchedServices, setValue]);
 
     return {
         templateModalOpen,

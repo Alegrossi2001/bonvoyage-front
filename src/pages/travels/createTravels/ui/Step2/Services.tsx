@@ -162,8 +162,22 @@ interface ServicesComponentProps {
 
 }
 
-const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierModalOpen, templateModalOpen, setOpenModalType, addFromSupplier, control, watchedServices, addService, addFromTemplate, fields, remove, calculateServiceTotals, setValue, errors }) => {
-
+const ServicesComponents: React.FC<ServicesComponentProps> = ({
+    theme,
+    supplierModalOpen,
+    templateModalOpen,
+    setOpenModalType,
+    addFromSupplier,
+    control,
+    watchedServices,
+    addService,
+    addFromTemplate,
+    fields,
+    remove,
+    calculateServiceTotals,
+    setValue,
+    errors,
+}) => {
     const [expandedServices, setExpandedServices] = useState<string[]>([]);
 
     // Calculate totals
@@ -259,7 +273,7 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
 
                                                 <Box flex={1}>
                                                     <Controller
-                                                        name={`services.${index}.description`}
+                                                        name={`step2.services.${index}.description`}
                                                         control={control}
                                                         rules={{ required: 'Description is required' }}
                                                         render={({ field }) => (
@@ -268,8 +282,8 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                                 fullWidth
                                                                 placeholder="Service description..."
                                                                 variant="standard"
-                                                                error={!!errors.services?.[index]?.description}
-                                                                helperText={errors.services?.[index]?.description?.message}
+                                                                error={!!errors?.step2?.services?.[index]?.description}
+                                                                helperText={errors?.step2?.services?.[index]?.description?.message}
                                                             />
                                                         )}
                                                     />
@@ -304,9 +318,9 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                 <Stack spacing={3}>
                                                     <Grid container spacing={2}>
                                                         {/* Category */}
-                                                        <Grid size={{ xs: 12, md: 3 }}>
+                                                        <Grid item xs={12} md={3}>
                                                             <Controller
-                                                                name={`services.${index}.category`}
+                                                                name={`step2.services.${index}.category`}
                                                                 control={control}
                                                                 render={({ field }) => (
                                                                     <FormControl fullWidth size="small">
@@ -317,7 +331,7 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                                             onChange={(e) => {
                                                                                 field.onChange(e.target.value);
                                                                                 const newUnits = categoryConfig[e.target.value as keyof typeof categoryConfig].units;
-                                                                                setValue(`services.${index}.unit`, newUnits[0]);
+                                                                                setValue(`step2.services.${index}.unit`, newUnits[0]);
                                                                             }}
                                                                         >
                                                                             {Object.entries(categoryConfig).map(([key, config]) => (
@@ -335,9 +349,9 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                         </Grid>
 
                                                         {/* Quantity */}
-                                                        <Grid size={{ xs: 6, md: 2 }}>
+                                                        <Grid item xs={6} md={2}>
                                                             <Controller
-                                                                name={`services.${index}.quantity`}
+                                                                name={`step2.services.${index}.quantity`}
                                                                 control={control}
                                                                 rules={{ required: true, min: 0.1 }}
                                                                 render={({ field }) => (
@@ -348,6 +362,8 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                                         label="Quantity"
                                                                         size="small"
                                                                         inputProps={{ min: 0.1, step: 0.1 }}
+                                                                        error={!!errors?.step2?.services?.[index]?.quantity}
+                                                                        helperText={errors?.step2?.services?.[index]?.quantity?.message}
                                                                         onChange={(e) => {
                                                                             field.onChange(parseFloat(e.target.value) || 0);
                                                                             setTimeout(() => calculateServiceTotals(index), 100);
@@ -358,9 +374,9 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                         </Grid>
 
                                                         {/* Unit */}
-                                                        <Grid size={{ xs: 6, md: 2 }}>
+                                                        <Grid item xs={6} md={2}>
                                                             <Controller
-                                                                name={`services.${index}.unit`}
+                                                                name={`step2.services.${index}.unit`}
                                                                 control={control}
                                                                 render={({ field }) => (
                                                                     <FormControl fullWidth size="small">
@@ -377,10 +393,10 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                             />
                                                         </Grid>
 
-                                                        {/* Unit Cost */}
-                                                        <Grid size={{ xs: 6, md: 2 }}>
+                                                        {/* Unit Price */}
+                                                        <Grid item xs={6} md={2}>
                                                             <Controller
-                                                                name={`services.${index}.unitCost`}
+                                                                name={`step2.services.${index}.unitPrice`}
                                                                 control={control}
                                                                 rules={{ required: true, min: 0 }}
                                                                 render={({ field }) => (
@@ -388,12 +404,14 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                                         {...field}
                                                                         fullWidth
                                                                         type="number"
-                                                                        label="Unit Cost"
+                                                                        label="Unit Price"
                                                                         size="small"
                                                                         InputProps={{
                                                                             startAdornment: <InputAdornment position="start">€</InputAdornment>,
                                                                             inputProps: { min: 0, step: 0.01 }
                                                                         }}
+                                                                        error={!!errors?.step2?.services?.[index]?.unitPrice}
+                                                                        helperText={errors?.step2?.services?.[index]?.unitPrice?.message}
                                                                         onChange={(e) => {
                                                                             field.onChange(parseFloat(e.target.value) || 0);
                                                                             setTimeout(() => calculateServiceTotals(index), 100);
@@ -404,9 +422,9 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                         </Grid>
 
                                                         {/* Markup */}
-                                                        <Grid size={{ xs: 6, md: 3 }}>
+                                                        <Grid item xs={6} md={3}>
                                                             <Controller
-                                                                name={`services.${index}.markup`}
+                                                                name={`step2.services.${index}.markup`}
                                                                 control={control}
                                                                 render={({ field }) => (
                                                                     <TextField
@@ -419,6 +437,8 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                                             endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                                                             inputProps: { min: 0, step: 0.1 }
                                                                         }}
+                                                                        error={!!errors?.step2?.services?.[index]?.markup}
+                                                                        helperText={errors?.step2?.services?.[index]?.markup?.message}
                                                                         onChange={(e) => {
                                                                             field.onChange(parseFloat(e.target.value) || 0);
                                                                             setTimeout(() => calculateServiceTotals(index), 100);
@@ -436,7 +456,7 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                         borderRadius: 1,
                                                     }}>
                                                         <Grid container spacing={2}>
-                                                            <Grid size={{ xs: 3 }}>
+                                                            <Grid item xs={3}>
                                                                 <Typography variant="caption" color="text.secondary">
                                                                     Net Cost
                                                                 </Typography>
@@ -444,7 +464,7 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                                     €{(service?.totalPrice || 0).toLocaleString()}
                                                                 </Typography>
                                                             </Grid>
-                                                            <Grid size={{ xs: 3 }}>
+                                                            <Grid item xs={3}>
                                                                 <Typography variant="caption" color="text.secondary">
                                                                     Markup
                                                                 </Typography>
@@ -452,7 +472,7 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                                     €{(service?.markup || 0).toLocaleString()}
                                                                 </Typography>
                                                             </Grid>
-                                                            <Grid size={{ xs: 3 }}>
+                                                            <Grid item xs={3}>
                                                                 <Typography variant="caption" color="text.secondary">
                                                                     Margin
                                                                 </Typography>
@@ -460,7 +480,7 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                                     {margin.toFixed(1)}%
                                                                 </Typography>
                                                             </Grid>
-                                                            <Grid size={{ xs: 3 }}>
+                                                            <Grid item xs={3}>
                                                                 <Typography variant="caption" color="text.secondary">
                                                                     Final Price
                                                                 </Typography>
@@ -473,9 +493,9 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
 
                                                     {/* Supplier & Notes */}
                                                     <Grid container spacing={2}>
-                                                        <Grid size={{ xs: 12, md: 6 }}>
+                                                        <Grid item xs={12} md={6}>
                                                             <Controller
-                                                                name={`services.${index}.supplier`}
+                                                                name={`step2.services.${index}.supplier`}
                                                                 control={control}
                                                                 render={({ field }) => (
                                                                     <TextField
@@ -488,9 +508,9 @@ const ServicesComponents: React.FC<ServicesComponentProps> = ({ theme, supplierM
                                                                 )}
                                                             />
                                                         </Grid>
-                                                        <Grid size={{ xs: 12, md: 6 }}>
+                                                        <Grid item xs={12} md={6}>
                                                             <Controller
-                                                                name={`services.${index}.notes`}
+                                                                name={`step2.services.${index}.notes`}
                                                                 control={control}
                                                                 render={({ field }) => (
                                                                     <TextField

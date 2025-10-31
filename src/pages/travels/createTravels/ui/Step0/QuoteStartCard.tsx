@@ -5,9 +5,9 @@ import { TemplateCard } from '../Primitives';
 import type { Theme } from '@mui/system';
 
 interface QuoteStartCardProps {
-    type: 'new' | 'clone';
-    selectedOption: 'new' | 'clone' | null;
-    handleOptionSelect: (option: 'new' | 'clone') => void;
+    type: 'new' | 'clone' | 'drafts';
+    selectedOption: 'new' | 'clone' | 'drafts' | null;
+    handleOptionSelect: (option: 'new' | 'clone' | 'drafts') => void;
     theme: Theme;
     tips: string[];
 }
@@ -32,6 +32,15 @@ const QuoteStartCard = ({ type, selectedOption, handleOptionSelect, theme, tips 
             iconColor: theme.palette.secondary.main,
             backgroundColor: alpha(theme.palette.secondary.main, 0.1),
             tipColor: 'secondary.main',
+        },
+        drafts: {
+            icon: ContentCopyOutlined,
+            title: 'Continue Draft',
+            description: 'Pick up where you left off with your saved draft quotations',
+            colorPalette: 'grey',
+            iconColor: theme.palette.grey[600],
+            backgroundColor: alpha(theme.palette.grey[600], 0.1),
+            tipColor: 'grey.main',
         }
     };
 
