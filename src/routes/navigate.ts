@@ -14,13 +14,11 @@ interface NavigationOptions extends NavigateOptions {
     skipAuthCheck?: boolean;
 }
 
-const TEST_ONBOARDING_MODE = false;
-
 const useBonVoyageNavigate = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const { isAuthenticated, hasPermission, hasRole, isOnboarded } = useAuthStore();
+    const { isAuthenticated, hasPermission, hasRole } = useAuthStore();
     const routeNavigate = useCallback((to: string, options: NavigationOptions = {}) => {
         const {
             requireAuth = false,
@@ -57,6 +55,17 @@ const useBonVoyageNavigate = () => {
         return true;
     }, [navigate, location, isAuthenticated, hasPermission, hasRole]);
 
+    const goToRouteWithParams = useCallback(
+        (routePattern: string, params: Record<string, string | number>, options?: NavigationOptions) => {
+            let route = routePattern;
+            Object.entries(params).forEach(([key, value]) => {
+                route = route.replace(`:${key}`, encodeURIComponent(String(value)));
+            });
+            routeNavigate(route, options);
+        },
+        [routeNavigate]
+    );
+
     const isOperator = hasRole('operator');
 
     const quickNav = {
@@ -65,6 +74,7 @@ const useBonVoyageNavigate = () => {
         confirmedTravels: () => routeNavigate('/bookings/confirmed'),
         back: () => navigate(-1),
         forward: () => navigate(1),
+        createItinerary: (id: string, options?: NavigationOptions) => goToRouteWithParams('/travels/create-itinerary/:id', { id }, options),
     };
 
     return {

@@ -3,12 +3,13 @@ import ConfirmedQuotationsTable from "./ui/ConfirmedQuotationsTable";
 
 const ConfirmedQuotations = () => {
 
-    const { manageBookings, viewTripFile } = useConfirmedTableActions();
+    const { manageBookings, viewTripFile, createItinerary } = useConfirmedTableActions();
 
     return (
         <ConfirmedQuotationsTable
             onManageBookings={manageBookings}
             onViewTripFile={viewTripFile}
+            onEditItinerary={createItinerary}
         />
     )
 }
