@@ -1,4 +1,3 @@
-// filepath: [Routes.tsx](http://_vscodecontentref_/0)
 import React from 'react';
 import {
     BookmarkAddOutlined,
@@ -20,6 +19,7 @@ import OperatorDashboard from '../pages/dashboards/operator/OperatorDashboard';
 import AssignRequests from '../pages/assign/AssignRequests';
 import CreateAutomation from '../pages/automations/create/CreateAutomation';
 import ManagerDashboard from '../pages/dashboards/user/UserDashboard';
+import CreateItinerary from '../pages/travels/createItinerary/CreateItinerary';
 
 export interface NavigationalRoutes {
     type: "collapse" | "title" | "divider" | "hidden";
@@ -150,6 +150,13 @@ export const NavigationalRoutes: NavigationalRoutes[] = [
         permissions: ["admin", "user"],
         route: "/admin/manage-roles",
         component: <div>Role Management Page</div>
+    },
+    {
+        type: "hidden",
+        name: "Crea Itinerario",
+        key: "create-itinerary",
+        route: "/travels/create-itinerary/:id",
+        component: <CreateItinerary />
     }
 
 ];
