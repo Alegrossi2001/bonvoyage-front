@@ -21,7 +21,7 @@ const normalizePath = (path: string): string => {
     }
 
     // Validate path format (basic security check)
-    const validPathRegex = /^\/[a-zA-Z0-9\-_/]*$/;
+    const validPathRegex = /^\/[a-zA-Z0-9\-_/:]*$/;
     if (!validPathRegex.test(normalizedPath)) {
         console.warn(`Invalid path format: ${path}. Using fallback.`);
         return '/dashboard';
@@ -62,6 +62,23 @@ const collectRoutes = (routes: NavigationalRoutesType[], parentPath = ''): any[]
                     </div>
                 ),
             });
+        }
+
+        if (route.type === 'hidden' && route.route && route.component) {
+            const normalizedPath = normalizePath(route.route);
+
+            console.log(`Processing hidden route: ${route.key} -> ${normalizedPath}`);
+
+            if (!usedPaths.has(normalizedPath)) {
+                usedPaths.add(normalizedPath);
+
+                const routePath = normalizedPath.startsWith('/') ? normalizedPath.slice(1) : normalizedPath;
+
+                routeElements.push({
+                    path: routePath,
+                    element: validateComponent(route.component, normalizedPath),
+                });
+            }
         }
 
         // Handle sub-routes recursively
